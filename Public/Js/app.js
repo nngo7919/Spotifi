@@ -93,13 +93,36 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	/* ── Volume bar click ── */
-	document.getElementById('volTrack').addEventListener('click', e => {
-		const rect = e.currentTarget.getBoundingClientRect();
-		volume = ((e.clientX - rect.left) / rect.width) * 100;
-		volume = Math.max(0, Math.min(100, volume));
-		document.getElementById('volFill').style.width = volume + '%';
+	const audio = document.getElementById("audio");
+	const volTrack = document.getElementById("volTrack");
+	const volFill = document.getElementById("volFill");
+
+	audio.volume = 0.7;
+	volFill.style.width = "70%";
+
+	let isDragging = false;
+
+	function setVolume(e) {
+		const rect = volTrack.getBoundingClientRect();
+		let percent = (e.clientX - rect.left) / rect.width;
+		percent = Math.max(0, Math.min(1, percent));
+
+		audio.volume = percent;
+		volFill.style.width = (percent * 100) + "%";
+	}
+
+	volTrack.addEventListener("mousedown", (e) => {
+		isDragging = true;
+		setVolume(e);
 	});
 
+	document.addEventListener("mousemove", (e) => {
+		if (isDragging) setVolume(e);
+	});
+
+	document.addEventListener("mouseup", () => {
+		isDragging = false;
+	});
 	/* ── Click card to "play" that track ── */
 	function playTrack(name, artist, emoji) {
 		trackName.textContent = name;
