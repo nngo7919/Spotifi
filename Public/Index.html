@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>Spotifi – Âm nhạc</title>
+
+	<!-- Bootstrap 5 CSS -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+		crossorigin="anonymous" />
+
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="Css/Style.css" />
+</head>
+
+<body>
+
+	<div id="app">
+
+		<!-- ==============================
+       SIDEBAR
+       ============================== -->
+		<aside id="sidebar">
+			<div class="sidebar-top">
+
+				<!-- Logo -->
+				<div class="sw-logo">
+					<div class="sw-logo-icon">
+						<svg viewBox="0 0 24 24">
+							<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10
+            10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
+						</svg>
+					</div>
+					<span class="sw-logo-text">Spotifi</span>
+				</div>
+
+				<!-- Nav -->
+				<ul>
+					<li>
+						<a href="#" class="nav-link-item active">
+							<svg viewBox="0 0 24 24" fill="currentColor">
+								<path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z" />
+							</svg>
+							Trang chủ
+						</a>
+					</li>
+					<li>
+						<a href="#" class="nav-link-item">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+								stroke-linecap="round">
+								<circle cx="11" cy="11" r="8" />
+								<path d="m21 21-4.35-4.35" />
+							</svg>
+							Tìm kiếm
+						</a>
+					</li>
+				</ul>
+			</div>
+
+			<!-- Library -->
+			<div class="library-header">
+				<span class="label">Thư viện</span>
+				<button class="btn-icon" title="Tạo playlist">
+					<svg viewBox="0 0 24 24" fill="currentColor">
+						<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
+					</svg>
+				</button>
+			</div>
+
+			<div id="libraryList">
+				<!-- Library items -->
+				<div class="lib-item" data-track="Bài hát đã thích" data-artist="Bạn" data-emoji="💚">
+					<div class="lib-thumb grad-17">💚</div>
+					<div class="overflow-hidden">
+						<div class="lib-name">Bài hát đã thích</div>
+						<div class="lib-meta">Danh sách phát • 7 bài</div>
+					</div>
+				</div>
+				<div class="lib-item" data-track="True Damage" data-artist="True Damage" data-emoji="🎮">
+					<div class="lib-thumb grad-1">🎮</div>
+					<div class="overflow-hidden">
+						<div class="lib-name">True Damage</div>
+						<div class="lib-meta">Nghệ sĩ</div>
+					</div>
+				</div>
+				<div class="lib-item" data-track="POP/STARS" data-artist="K/DA" data-emoji="✨">
+					<div class="lib-thumb grad-2">✨</div>
+					<div class="overflow-hidden">
+						<div class="lib-name">K/DA</div>
+						<div class="lib-meta">Nghệ sĩ</div>
+					</div>
+				</div>
+				<div class="lib-item" data-track="Mortal Reminder" data-artist="Pentakill" data-emoji="⚔️">
+					<div class="lib-thumb grad-5">⚔️</div>
+					<div class="overflow-hidden">
+						<div class="lib-name">Pentakill</div>
+						<div class="lib-meta">Nghệ sĩ</div>
+					</div>
+				</div>
+				<div class="lib-item" data-track="RISE" data-artist="Seraphine" data-emoji="🌿">
+					<div class="lib-thumb grad-3">🌿</div>
+					<div class="overflow-hidden">
+						<div class="lib-name">Seraphine</div>
+						<div class="lib-meta">Nghệ sĩ</div>
+					</div>
+				</div>
+				<div class="lib-item" data-track="Warriors" data-artist="League of Legends" data-emoji="🎯">
+					<div class="lib-thumb grad-12">🎯</div>
+					<div class="overflow-hidden">
+						<div class="lib-name">League of Legends</div>
+						<div class="lib-meta">Nghệ sĩ</div>
+					</div>
+				</div>
+				<div class="lib-item" data-track="Anh Nhà Ở Đâu Thế" data-artist="AMEE" data-emoji="🎤">
+					<div class="lib-thumb grad-4">🎤</div>
+					<div class="overflow-hidden">
+						<div class="lib-name">AMEE</div>
+						<div class="lib-meta">Nghệ sĩ</div>
+					</div>
+				</div>
+				<div class="lib-item" data-track="thank u, next" data-artist="Ariana Grande" data-emoji="💃">
+					<div class="lib-thumb grad-6">💃</div>
+					<div class="overflow-hidden">
+						<div class="lib-name">Ariana Grande</div>
+						<div class="lib-meta">Nghệ sĩ</div>
+					</div>
+				</div>
+				<div class="lib-item" data-track="Attention" data-artist="Charlie Puth" data-emoji="🎹">
+					<div class="lib-thumb grad-14">🎹</div>
+					<div class="overflow-hidden">
+						<div class="lib-name">Charlie Puth</div>
+						<div class="lib-meta">Nghệ sĩ</div>
+					</div>
+				</div>
+			</div>
+		</aside>
+
+		<!-- ==============================
+       MAIN CONTENT
+       ============================== -->
+		<main id="mainContent">
+
+			<!-- Topbar -->
+			<div id="topbar">
+				<div class="d-flex align-items-center justify-content-between gap-3">
+
+					<!-- Left: arrows + search -->
+					<div class="d-flex align-items-center gap-2 flex-grow-1">
+						<button class="btn-nav" title="Quay lại">
+							<svg viewBox="0 0 24 24" fill="currentColor">
+								<path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8
+                1.41-1.41L7.83 13H20v-2z" />
+							</svg>
+						</button>
+						<button class="btn-nav" title="Tiến">
+							<svg viewBox="0 0 24 24" fill="currentColor">
+								<path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58
+                5.59L12 20l8-8z" />
+							</svg>
+						</button>
+						<div class="search-box">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+								stroke-width="2.5" stroke-linecap="round">
+								<circle cx="11" cy="11" r="8" />
+								<path d="m21 21-4.35-4.35" />
+							</svg>
+							<input type="text" placeholder="Bạn muốn nghe gì?" />
+						</div>
+					</div>
+
+					<!-- Right: premium btn -->
+					<button class="btn-premium">Khám phá Premium</button>
+				</div>
+			</div>
+
+			<!-- Inner scroll content -->
+			<div class="px-4 py-3">
+
+				<!-- Filter tabs (Bootstrap button-group style) -->
+				<div class="d-flex gap-2 flex-wrap mb-4">
+					<button class="filter-tab active">Tất cả</button>
+					<button class="filter-tab">Nhạc</button>
+					<button class="filter-tab">Podcasts</button>
+					<button class="filter-tab">Nghệ sĩ</button>
+				</div>
+
+				<!-- Featured pinned: 2-col grid (Bootstrap row) -->
+				<div class="row g-2 mb-4">
+					<div class="col-6">
+						<div class="featured-card grad-11" data-track="キラキラポップ" data-artist="Japan Hits"
+							data-emoji="🌸">
+							<div class="fc-thumb">🌸</div>
+							<span class="fc-name">キラキラポップ：ジャパン</span>
+						</div>
+					</div>
+					<div class="col-6">
+						<div class="featured-card grad-13" data-track="渇愛エチュード" data-artist="YOASOBI" data-emoji="🌙">
+							<div class="fc-thumb">🌙</div>
+							<span class="fc-name">渇愛エチュード</span>
+						</div>
+					</div>
+					<div class="col-6">
+						<div class="featured-card grad-17" data-track="Bài hát đã thích" data-artist="Bạn"
+							data-emoji="💚">
+							<div class="fc-thumb">💚</div>
+							<span class="fc-name">Bài hát đã thích</span>
+						</div>
+					</div>
+					<div class="col-6">
+						<div class="featured-card grad-9" data-track="V-Sound Ngay Lúc Này" data-artist="Various"
+							data-emoji="🦊">
+							<div class="fc-thumb">🦊</div>
+							<span class="fc-name">V-Sound Ngay Lúc Này</span>
+						</div>
+					</div>
+				</div>
+
+				<!-- Section: New releases -->
+				<div class="mb-5">
+					<div class="d-flex justify-content-between align-items-center mb-3">
+						<h2 class="section-title m-0">Giai điệu mới mỗi thứ Sáu! 🎵</h2>
+						<a href="#" class="see-all">Hiện tất cả</a>
+					</div>
+					<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xl-6 g-3">
+
+						<div class="col">
+							<div class="music-card" data-track="Nhạc mới trong tuần" data-artist="Bruno Mars, RAYE"
+								data-emoji="🎩">
+								<div class="card-thumb-wrap grad-7">
+									<div class="card-emoji">🎩</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">Nhạc mới trong tuần</div>
+								<div class="card-sub">Bruno Mars, RAYE và nhiều nghệ sĩ khác</div>
+							</div>
+						</div>
+
+						<div class="col">
+							<div class="music-card" data-track="Mới Ra Lò" data-artist="Various" data-emoji="🎙️">
+								<div class="card-thumb-wrap grad-8">
+									<div class="card-emoji">🎙️</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">Mới Ra Lò</div>
+								<div class="card-sub">Nhún nhảy theo những giai điệu mới toanh</div>
+							</div>
+						</div>
+
+						<div class="col">
+							<div class="music-card" data-track="V-Sound Ngay Lúc Này" data-artist="Various"
+								data-emoji="🦊">
+								<div class="card-thumb-wrap grad-9">
+									<div class="card-emoji">🦊</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">V-Sound Ngay Lúc Này</div>
+								<div class="card-sub">Đón Tết cùng những bản nhạc Việt mới drop</div>
+							</div>
+						</div>
+
+						<div class="col">
+							<div class="music-card" data-track="K-Pop Ngay Lúc Này" data-artist="IVE" data-emoji="💜">
+								<div class="card-thumb-wrap grad-10">
+									<div class="card-emoji">💜</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">K-Pop Ngay Lúc Này</div>
+								<div class="card-sub">Fan K-Pop còn cần gì hơn? Ảnh bìa: IVE</div>
+							</div>
+						</div>
+
+						<div class="col">
+							<div class="music-card" data-track="ティーンカルチャー" data-artist="Japan Pop" data-emoji="🌸">
+								<div class="card-thumb-wrap grad-11">
+									<div class="card-emoji">🌸</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">ティーンカルチャー</div>
+								<div class="card-sub">今、日本のティーンエイジャーに聴かれている</div>
+							</div>
+						</div>
+
+						<div class="col">
+							<div class="music-card" data-track="キラキラポップ" data-artist="Japan Hits" data-emoji="✨">
+								<div class="card-thumb-wrap grad-12">
+									<div class="card-emoji">✨</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">キラキラポップ</div>
+								<div class="card-sub">独自の進化を遂げる日本のポップ文化</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+				<!-- Section: Recently played -->
+				<div class="mb-5">
+					<div class="d-flex justify-content-between align-items-center mb-3">
+						<h2 class="section-title m-0">Mới phát gần đây</h2>
+						<a href="#" class="see-all">Hiện tất cả</a>
+					</div>
+					<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
+
+						<div class="col">
+							<div class="music-card" data-track="渇愛エチュード" data-artist="YOASOBI" data-emoji="🌙">
+								<div class="card-thumb-wrap grad-13">
+									<div class="card-emoji">🌙</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">渇愛エチュード</div>
+								<div class="card-sub">Album · YOASOBI</div>
+							</div>
+						</div>
+
+						<div class="col">
+							<div class="music-card" data-track="キラキラポップ：ジャパン" data-artist="Japan Hits" data-emoji="🌸">
+								<div class="card-thumb-wrap grad-11">
+									<div class="card-emoji">🌸</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">キラキラポップ：ジャパン</div>
+								<div class="card-sub">Playlist</div>
+							</div>
+						</div>
+
+						<div class="col">
+							<div class="music-card" data-track="Từng Ngày Như Mãi Mãi" data-artist="Various"
+								data-emoji="🎵">
+								<div class="card-thumb-wrap grad-14">
+									<div class="card-emoji">🎵</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">Từng Ngày Như Mãi Mãi</div>
+								<div class="card-sub">Album</div>
+							</div>
+						</div>
+
+						<div class="col">
+							<div class="music-card" data-track="Đánh Đổi" data-artist="Various" data-emoji="🌊">
+								<div class="card-thumb-wrap grad-6">
+									<div class="card-emoji">🌊</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">Đánh Đổi</div>
+								<div class="card-sub">Album</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+				<!-- Section: Recommended -->
+				<div class="mb-5">
+					<div class="d-flex justify-content-between align-items-center mb-3">
+						<h2 class="section-title m-0">Đề xuất cho bạn</h2>
+						<a href="#" class="see-all">Hiện tất cả</a>
+					</div>
+					<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 g-3">
+
+						<div class="col">
+							<div class="music-card" data-track="Chill Vibes" data-artist="Various" data-emoji="🎶">
+								<div class="card-thumb-wrap grad-15">
+									<div class="card-emoji">🎶</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">Chill Vibes</div>
+								<div class="card-sub">Những bản nhạc thư giãn nhất</div>
+							</div>
+						</div>
+
+						<div class="col">
+							<div class="music-card" data-track="Hot 100" data-artist="Various" data-emoji="🔥">
+								<div class="card-thumb-wrap grad-7">
+									<div class="card-emoji">🔥</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">Hot 100</div>
+								<div class="card-sub">Bảng xếp hạng nóng nhất tuần</div>
+							</div>
+						</div>
+
+						<div class="col">
+							<div class="music-card" data-track="Acoustic Sessions" data-artist="Various"
+								data-emoji="🎸">
+								<div class="card-thumb-wrap grad-1">
+									<div class="card-emoji">🎸</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">Acoustic Sessions</div>
+								<div class="card-sub">Tiếng đàn guitar nhẹ nhàng</div>
+							</div>
+						</div>
+
+						<div class="col">
+							<div class="music-card" data-track="Nhạc Việt Hay Nhất" data-artist="Various"
+								data-emoji="🌅">
+								<div class="card-thumb-wrap grad-16">
+									<div class="card-emoji">🌅</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">Nhạc Việt Hay Nhất</div>
+								<div class="card-sub">Tuyển tập nhạc Việt đỉnh cao</div>
+							</div>
+						</div>
+
+						<div class="col">
+							<div class="music-card" data-track="Indie Asia" data-artist="Various" data-emoji="🌿">
+								<div class="card-thumb-wrap grad-3">
+									<div class="card-emoji">🌿</div>
+									<button class="play-btn-overlay">
+										<svg viewBox="0 0 24 24">
+											<path d="M8 5v14l11-7z" />
+										</svg>
+									</button>
+								</div>
+								<div class="card-title">Indie Asia</div>
+								<div class="card-sub">Hottest indie sounds from Asia</div>
+							</div>
+						</div>
+
+					</div>
+				</div>
+
+			</div><!-- /px-4 -->
+		</main>
+
+		<!-- ==============================
+       PLAYER
+       ============================== -->
+		<footer id="player">
+
+			<!-- Left: now playing -->
+			<div class="d-flex align-items-center gap-3">
+				<div class="now-thumb grad-13" id="nowThumb">🌙</div>
+				<div class="overflow-hidden">
+					<div class="track-name" id="trackName">渇愛エチュード</div>
+					<div class="track-artist" id="trackArtist">YOASOBI</div>
+				</div>
+				<div class="playing-bars" id="playingBars">
+					<span></span><span></span><span></span>
+				</div>
+			</div>
+
+			<!-- Center: controls + progress -->
+			<div class="d-flex flex-column align-items-center gap-2">
+				<div class="d-flex align-items-center gap-4">
+					<!-- Shuffle -->
+					<button class="ctrl-btn" id="shuffleBtn" title="Phát ngẫu nhiên">
+						<svg viewBox="0 0 24 24" fill="currentColor">
+							<path d="M10.59 9.17L5.41 4 4 5.41l5.17 5.17 1.42-1.41zM14.5 4l2.04
+              2.04L4 18.59 5.41 20 17.96 7.46 20 9.5V4h-5.5zm.33 9.41l-1.41 1.41
+              3.13 3.13L14.5 20H20v-5.5l-2.04 2.04-3.13-3.13z" />
+						</svg>
+					</button>
+
+					<!-- Prev -->
+					<button class="ctrl-btn" id="prevBtn" title="Trước">
+						<svg viewBox="0 0 24 24" fill="currentColor">
+							<path d="M6 6h2v12H6zm3.5 6l8.5 6V6z" />
+						</svg>
+					</button>
+
+					<!-- Play / Pause -->
+					<button class="play-main" id="playBtn">
+						<svg viewBox="0 0 24 24" id="playIcon">
+							<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z" />
+						</svg>
+					</button>
+
+					<!-- Next -->
+					<button class="ctrl-btn" id="nextBtn" title="Tiếp theo">
+						<svg viewBox="0 0 24 24" fill="currentColor">
+							<path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z" />
+						</svg>
+					</button>
+
+					<!-- Repeat -->
+					<button class="ctrl-btn" id="repeatBtn" title="Lặp lại">
+						<svg viewBox="0 0 24 24" fill="currentColor">
+							<path d="M7 7h10v3l4-4-4-4v3H5v6h2V7zm10 10H7v-3l-4 4 4 4v-3h12v-6h-2v4z" />
+						</svg>
+					</button>
+				</div>
+
+				<!-- Progress bar -->
+				<div class="progress-wrap">
+					<span class="time-label" id="timeNow">0:00</span>
+					<div class="progress-track" id="progressTrack">
+						<div class="progress-fill" id="progressFill">
+							<div class="progress-handle"></div>
+						</div>
+					</div>
+					<span class="time-label">3:58</span>
+				</div>
+			</div>
+
+			<!-- Right: volume -->
+			<div class="d-flex align-items-center justify-content-end gap-3">
+				<button class="ctrl-btn" title="Hàng chờ">
+					<svg viewBox="0 0 24 24" fill="currentColor">
+						<path d="M15 6H3v2h12V6zm0 4H3v2h12v-2zM3 16h8v-2H3v2zM17
+            6v8.18c-.31-.11-.65-.18-1-.18-1.66 0-3 1.34-3 3s1.34 3 3 3
+            3-1.34 3-3V8h3V6h-5z" />
+					</svg>
+				</button>
+
+				<!-- Volume -->
+				<div class="d-flex align-items-center gap-2">
+					<button class="ctrl-btn" title="Âm lượng">
+						<svg viewBox="0 0 24 24" fill="currentColor">
+							<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05
+              c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11
+              5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />
+						</svg>
+					</button>
+					<div class="vol-track" id="volTrack">
+						<div class="vol-fill" id="volFill"></div>
+					</div>
+				</div>
+			</div>
+
+		</footer>
+
+	</div><!-- /#app -->
+
+	<!-- Bootstrap 5 JS -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"
+		crossorigin="anonymous"></script>
+
+	<!-- Custom JS -->
+	<script src="script.js"></script>
+</body>
+
+</html>
