@@ -23,20 +23,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	/* ── Player State ── */
 	let playing = true;
-	let progress = 35; // percent
-	let volume = 70; // percent
+	let progress = 35;
+	let volume = 70;
 	let progressInterval;
 
 	const playBtn = document.getElementById('playBtn');
 	const playIcon = document.getElementById('playIcon');
 	const bars = document.getElementById('playingBars');
 	const progFill = document.getElementById('progressFill');
+	const progHandle = document.querySelector('.progress-handle');
+	const progressTrack = document.getElementById('progressTrack');
 	const timeNow = document.getElementById('timeNow');
 	const trackName = document.getElementById('trackName');
 	const trackArtist = document.getElementById('trackArtist');
 	const nowThumb = document.getElementById('nowThumb');
+	const volTrack = document.getElementById('volTrack');
+	const volFill = document.getElementById('volFill');
 
-	/* Total track duration in seconds (mock) */
 	const DURATION = 238;
 
 	function secondsToMMSS(s) {
@@ -46,27 +49,31 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	function updateProgressUI() {
-		progFill.style.width = progress + '%';
-		const elapsed = Math.floor((progress / 100) * DURATION);
-		timeNow.textContent = secondsToMMSS(elapsed);
+		const pct = Math.max(0, Math.min(100, progress));
+		progFill.style.width = pct + '%';
+		if (progHandle) progHandle.style.left = pct + '%';
+		timeNow.textContent = secondsToMMSS(Math.floor((pct / 100) * DURATION));
 	}
+
+	function updateVolumeUI() {
+		volFill.style.width = Math.max(0, Math.min(100, volume)) + '%';
+	}
+
+	let isDraggingProg = false;
 
 	function startProgress() {
 		clearInterval(progressInterval);
 		progressInterval = setInterval(() => {
-			if (playing) {
+			if (playing && !isDraggingProg) {
 				progress = Math.min(100, progress + (100 / DURATION / 10));
 				updateProgressUI();
-				if (progress >= 100) { stopProgress(); }
+				if (progress >= 100) {
+					playing = false;
+					playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+					bars.style.opacity = '0.3';
+				}
 			}
 		}, 100);
-	}
-
-	function stopProgress() {
-		clearInterval(progressInterval);
-		playing = false;
-		playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
-		bars.style.opacity = '0.3';
 	}
 
 	startProgress();
@@ -84,46 +91,102 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 
-	/* ── Progress bar click ── */
-	document.getElementById('progressTrack').addEventListener('click', e => {
-		const rect = e.currentTarget.getBoundingClientRect();
-		progress = ((e.clientX - rect.left) / rect.width) * 100;
-		progress = Math.max(0, Math.min(100, progress));
+	/* ══════════════════════════════
+				PROGRESS BAR
+				══════════════════════════════ */
+	function calcProgress(clientX) {
+		const rect = progressTrack.getBoundingClientRect();
+		return Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
+	}
+
+	progressTrack.addEventListener('mousedown', e => {
+		isDraggingProg = true;
+		progressTrack.classList.add('dragging');
+		progress = calcProgress(e.clientX);
+		updateProgressUI();
+		e.preventDefault();
+	});
+
+	document.addEventListener('mousemove', e => {
+		if (!isDraggingProg) return;
+		progress = calcProgress(e.clientX);
 		updateProgressUI();
 	});
 
-	/* ── Volume bar click ── */
-	const audio = document.getElementById("audio");
-	const volTrack = document.getElementById("volTrack");
-	const volFill = document.getElementById("volFill");
+	document.addEventListener('mouseup', () => {
+		if (!isDraggingProg) return;
+		isDraggingProg = false;
+		progressTrack.classList.remove('dragging');
+	});
 
-	audio.volume = 0.7;
-	volFill.style.width = "70%";
+	progressTrack.addEventListener('wheel', e => {
+		e.preventDefault();
+		progress = Math.max(0, Math.min(100, progress - e.deltaY * 0.3));
+		updateProgressUI();
+	}, { passive: false });
 
-	let isDragging = false;
+	progressTrack.addEventListener('touchstart', e => {
+		isDraggingProg = true;
+		progress = calcProgress(e.touches[0].clientX);
+		updateProgressUI();
+		e.preventDefault();
+	}, { passive: false });
 
-	function setVolume(e) {
+	document.addEventListener('touchmove', e => {
+		if (!isDraggingProg) return;
+		progress = calcProgress(e.touches[0].clientX);
+		updateProgressUI();
+	}, { passive: false });
+
+	document.addEventListener('touchend', () => { isDraggingProg = false; });
+
+	/* ══════════════════════════════
+				VOLUME BAR
+				══════════════════════════════ */
+	let isDraggingVol = false;
+
+	function calcVolume(clientX) {
 		const rect = volTrack.getBoundingClientRect();
-		let percent = (e.clientX - rect.left) / rect.width;
-		percent = Math.max(0, Math.min(1, percent));
-
-		audio.volume = percent;
-		volFill.style.width = (percent * 100) + "%";
+		return Math.max(0, Math.min(100, ((clientX - rect.left) / rect.width) * 100));
 	}
 
-	volTrack.addEventListener("mousedown", (e) => {
-		isDragging = true;
-		setVolume(e);
+	volTrack.addEventListener('mousedown', e => {
+		isDraggingVol = true;
+		volume = calcVolume(e.clientX);
+		updateVolumeUI();
+		e.preventDefault();
 	});
 
-	document.addEventListener("mousemove", (e) => {
-		if (isDragging) setVolume(e);
+	document.addEventListener('mousemove', e => {
+		if (!isDraggingVol) return;
+		volume = calcVolume(e.clientX);
+		updateVolumeUI();
 	});
 
-	document.addEventListener("mouseup", () => {
-		isDragging = false;
-	});
-	/* ── Click card to "play" that track ── */
+	document.addEventListener('mouseup', () => { isDraggingVol = false; });
+
+	volTrack.addEventListener('wheel', e => {
+		e.preventDefault();
+		volume = Math.max(0, Math.min(100, volume - e.deltaY * 0.2));
+		updateVolumeUI();
+	}, { passive: false });
+
+	volTrack.addEventListener('touchstart', e => {
+		isDraggingVol = true;
+		volume = calcVolume(e.touches[0].clientX);
+		updateVolumeUI();
+		e.preventDefault();
+	}, { passive: false });
+
+	document.addEventListener('touchmove', e => {
+		if (!isDraggingVol) return;
+		volume = calcVolume(e.touches[0].clientX);
+		updateVolumeUI();
+	}, { passive: false });
+
+	document.addEventListener('touchend', () => { isDraggingVol = false; });
+
+	/* ── Click card → play track ── */
 	function playTrack(name, artist, emoji) {
 		trackName.textContent = name;
 		trackArtist.textContent = artist;
@@ -137,33 +200,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	document.querySelectorAll('[data-track]').forEach(el => {
 		el.addEventListener('click', () => {
-			const name = el.dataset.track;
-			const artist = el.dataset.artist || 'SoundWave';
-			const emoji = el.dataset.emoji || '🎵';
-			playTrack(name, artist, emoji);
+			playTrack(el.dataset.track, el.dataset.artist || 'SoundWave', el.dataset.emoji || '🎵');
 		});
 	});
 
-	/* ── Skip buttons ── */
-	document.getElementById('nextBtn').addEventListener('click', () => {
-		progress = 0;
-		updateProgressUI();
-	});
+	/* ── Skip ── */
+	document.getElementById('nextBtn').addEventListener('click', () => { progress = 0; updateProgressUI(); });
+	document.getElementById('prevBtn').addEventListener('click', () => { progress = 0; updateProgressUI(); });
 
-	document.getElementById('prevBtn').addEventListener('click', () => {
-		progress = 0;
-		updateProgressUI();
-	});
-
-	/* ── Shuffle / Repeat button highlight ── */
+	/* ── Shuffle / Repeat ── */
 	['shuffleBtn', 'repeatBtn'].forEach(id => {
-		document.getElementById(id).addEventListener('click', () => {
-			const btn = document.getElementById(id);
-			const isActive = btn.style.color === 'rgb(29, 185, 84)';
-			btn.style.color = isActive ? '' : '#1db954';
+		const btn = document.getElementById(id);
+		btn.addEventListener('click', () => {
+			const on = btn.getAttribute('data-active') === '1';
+			btn.setAttribute('data-active', on ? '0' : '1');
+			btn.style.color = on ? '' : '#1db954';
 		});
 	});
 
-	/* ── Initial UI ── */
+	/* ── Init ── */
 	updateProgressUI();
+	updateVolumeUI();
 });

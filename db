@@ -1,0 +1,197 @@
+-- =============================================
+--  SoundWave Database Schema (MySQL)
+-- =============================================
+
+CREATE DATABASE IF NOT EXISTS soundwave
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+USE soundwave;
+
+-- ─────────────────────────────────────────────
+-- 1. USERS
+-- ─────────────────────────────────────────────
+CREATE TABLE users (
+  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+  username     VARCHAR(50)     NOT NULL UNIQUE,
+  email        VARCHAR(100)    NOT NULL UNIQUE,
+  password     VARCHAR(255)    NOT NULL,
+  avatar_url   VARCHAR(500)    DEFAULT NULL,
+  country      VARCHAR(50)     DEFAULT NULL,
+  birthday     DATE            DEFAULT NULL,
+  created_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+  updated_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- ─────────────────────────────────────────────
+-- 2. SUBSCRIPTIONS
+-- ─────────────────────────────────────────────
+CREATE TABLE subscriptions (
+  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+  user_id      INT UNSIGNED    NOT NULL,
+  plan         ENUM('free','premium','student','family') DEFAULT 'free',
+  started_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+  expires_at   TIMESTAMP       DEFAULT NULL,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ─────────────────────────────────────────────
+-- 3. GENRES
+-- ─────────────────────────────────────────────
+CREATE TABLE genres (
+  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+  name         VARCHAR(50)     NOT NULL UNIQUE,
+  cover_url    VARCHAR(500)    DEFAULT NULL
+);
+
+-- ─────────────────────────────────────────────
+-- 4. ARTISTS
+-- ─────────────────────────────────────────────
+CREATE TABLE artists (
+  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+  name         VARCHAR(100)    NOT NULL,
+  bio          TEXT            DEFAULT NULL,
+  avatar_url   VARCHAR(500)    DEFAULT NULL,
+  country      VARCHAR(50)     DEFAULT NULL,
+  verified     TINYINT(1)      DEFAULT 0,
+  created_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP
+);
+
+-- ─────────────────────────────────────────────
+-- 5. ALBUMS
+-- ─────────────────────────────────────────────
+CREATE TABLE albums (
+  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+  artist_id    INT UNSIGNED    NOT NULL,
+  title        VARCHAR(200)    NOT NULL,
+  cover_url    VARCHAR(500)    DEFAULT NULL,
+  release_date DATE            DEFAULT NULL,
+  type         ENUM('album','single','ep') DEFAULT 'album',
+  created_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
+);
+
+-- ─────────────────────────────────────────────
+-- 6. SONGS
+-- ─────────────────────────────────────────────
+CREATE TABLE songs (
+  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+  album_id     INT UNSIGNED    DEFAULT NULL,
+  artist_id    INT UNSIGNED    NOT NULL,
+  title        VARCHAR(200)    NOT NULL,
+  duration     INT UNSIGNED    NOT NULL COMMENT 'seconds',
+  file_url     VARCHAR(500)    NOT NULL,
+  cover_url    VARCHAR(500)    DEFAULT NULL,
+  track_number TINYINT UNSIGNED DEFAULT 1,
+  plays_count  BIGINT UNSIGNED DEFAULT 0,
+  is_explicit  TINYINT(1)      DEFAULT 0,
+  created_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (album_id)  REFERENCES albums(id)  ON DELETE SET NULL,
+  FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
+);
+
+-- ─────────────────────────────────────────────
+-- 7. SONG_GENRES (trung gian)
+-- ─────────────────────────────────────────────
+CREATE TABLE song_genres (
+  song_id      INT UNSIGNED    NOT NULL,
+  genre_id     INT UNSIGNED    NOT NULL,
+  PRIMARY KEY (song_id, genre_id),
+  FOREIGN KEY (song_id)  REFERENCES songs(id)  ON DELETE CASCADE,
+  FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE CASCADE
+);
+
+-- ─────────────────────────────────────────────
+-- 8. PLAYLISTS
+-- ─────────────────────────────────────────────
+CREATE TABLE playlists (
+  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
+  user_id      INT UNSIGNED    NOT NULL,
+  name         VARCHAR(200)    NOT NULL,
+  description  TEXT            DEFAULT NULL,
+  cover_url    VARCHAR(500)    DEFAULT NULL,
+  is_public    TINYINT(1)      DEFAULT 1,
+  created_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+  updated_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+-- ─────────────────────────────────────────────
+-- 9. PLAYLIST_SONGS (trung gian)
+-- ─────────────────────────────────────────────
+CREATE TABLE playlist_songs (
+  playlist_id  INT UNSIGNED    NOT NULL,
+  song_id      INT UNSIGNED    NOT NULL,
+  position     SMALLINT UNSIGNED DEFAULT 0,
+  added_at     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (playlist_id, song_id),
+  FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE,
+  FOREIGN KEY (song_id)     REFERENCES songs(id)     ON DELETE CASCADE
+);
+
+-- ─────────────────────────────────────────────
+-- 10. LIKED_SONGS
+-- ─────────────────────────────────────────────
+CREATE TABLE liked_songs (
+  user_id      INT UNSIGNED    NOT NULL,
+  song_id      INT UNSIGNED    NOT NULL,
+  liked_at     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, song_id),
+  FOREIGN KEY (user_id) REFERENCES users(id)  ON DELETE CASCADE,
+  FOREIGN KEY (song_id) REFERENCES songs(id)  ON DELETE CASCADE
+);
+
+-- ─────────────────────────────────────────────
+-- 11. FOLLOWED_ARTISTS
+-- ─────────────────────────────────────────────
+CREATE TABLE followed_artists (
+  user_id      INT UNSIGNED    NOT NULL,
+  artist_id    INT UNSIGNED    NOT NULL,
+  followed_at  TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (user_id, artist_id),
+  FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE CASCADE,
+  FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
+);
+
+-- ─────────────────────────────────────────────
+-- 12. PLAY_HISTORY
+-- ─────────────────────────────────────────────
+CREATE TABLE play_history (
+  id           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  user_id      INT UNSIGNED    NOT NULL,
+  song_id      INT UNSIGNED    NOT NULL,
+  played_at    TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
+  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+  FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE,
+  INDEX idx_user_played (user_id, played_at DESC)
+);
+
+-- =============================================
+--  SAMPLE DATA
+-- =============================================
+
+INSERT INTO genres (name) VALUES
+  ('Pop'), ('K-Pop'), ('J-Pop'), ('V-Pop'),
+  ('Rock'), ('Hip-Hop'), ('Indie'), ('Electronic');
+
+INSERT INTO artists (name, country, verified) VALUES
+  ('YOASOBI',     'Japan',       1),
+  ('AMEE',        'Vietnam',     1),
+  ('IVE',         'South Korea', 1),
+  ('Charlie Puth','USA',         1),
+  ('Bruno Mars',  'USA',         1);
+
+INSERT INTO albums (artist_id, title, release_date, type) VALUES
+  (1, '渇愛エチュード',          '2024-01-15', 'album'),
+  (2, 'Từng Ngày Như Mãi Mãi',  '2024-03-20', 'album'),
+  (3, 'K-Pop Ngay Lúc Này',     '2024-02-10', 'ep'),
+  (4, 'Nine Track Mind',        '2016-01-27', 'album');
+
+INSERT INTO songs (album_id, artist_id, title, duration, file_url, track_number) VALUES
+  (1, 1, '渇愛エチュード',          215, '/audio/katuai.mp3',    1),
+  (1, 1, 'Idol',                   212, '/audio/idol.mp3',       2),
+  (2, 2, 'Từng Ngày Như Mãi Mãi', 198, '/audio/tungngay.mp3',   1),
+  (2, 2, 'Đánh Đổi',              225, '/audio/danhdoi.mp3',    2),
+  (3, 3, 'Eleven',                 187, '/audio/eleven.mp3',     1),
+  (4, 4, 'Attention',             207, '/audio/attention.mp3',  1),
+  (4, 4, 'We Dont Talk Anymore',  213, '/audio/wedont.mp3',     2);

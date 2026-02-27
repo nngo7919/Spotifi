@@ -4,7 +4,7 @@
 <head>
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-	<title>Spotifi – Âm nhạc</title>
+	<title>SoundWave – Âm nhạc</title>
 
 	<!-- Bootstrap 5 CSS -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
@@ -32,7 +32,7 @@
             10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
 						</svg>
 					</div>
-					<span class="sw-logo-text">Spotifi</span>
+					<span class="sw-logo-text">SoundWave</span>
 				</div>
 
 				<!-- Nav -->
@@ -544,9 +544,8 @@
 				<div class="progress-wrap">
 					<span class="time-label" id="timeNow">0:00</span>
 					<div class="progress-track" id="progressTrack">
-						<div class="progress-fill" id="progressFill">
-							<div class="progress-handle"></div>
-						</div>
+						<div class="progress-fill" id="progressFill"></div>
+						<div class="progress-handle"></div>
 					</div>
 					<span class="time-label">3:58</span>
 				</div>
@@ -563,7 +562,6 @@
 				</button>
 
 				<!-- Volume -->
-				<audio id="audio" src="audio/DAOBUOCHONGKONG1999 prod. GAZ [qsiO_vC7MEQ].mp3"></audio>
 				<div class="d-flex align-items-center gap-2">
 					<button class="ctrl-btn" title="Âm lượng">
 						<svg viewBox="0 0 24 24" fill="currentColor">
@@ -573,9 +571,7 @@
 						</svg>
 					</button>
 					<div class="vol-track" id="volTrack">
-						<div class="vol-fill" id="volFill">
-							<div class="vol-handle"></div>
-						</div>
+						<div class="vol-fill" id="volFill"></div>
 					</div>
 				</div>
 			</div>
@@ -589,7 +585,7 @@
 		crossorigin="anonymous"></script>
 
 	<!-- Custom JS -->
-	<script src="script.js"></script>
+	<script src="Js/app.js"></script>
 </body>
 
 </html>

@@ -457,27 +457,89 @@ ul { list-style: none; padding: 0; margin: 0; }
 .progress-wrap { display: flex; align-items: center; gap: 12px; width: 100%; }
 .time-label { font-size: 11px; color: var(--text-dim); font-weight: 600; min-width: 36px; text-align: center; }
 
+/* Progress bar wrapper — padding ẩn giúp dễ grab hơn */
+.progress-wrap { display: flex; align-items: center; gap: 12px; width: 100%; }
+
 .progress-track {
   flex: 1;
+  height: 20px;               /* vùng bắt chuột cao, dễ click/drag */
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  position: relative;
+  background: transparent;
+}
+
+/* Nền xám của thanh */
+.progress-track::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  top: 50%; bottom: auto;
+  transform: translateY(-50%);
   height: 4px;
   background: var(--border);
   border-radius: 4px;
-  cursor: pointer;
-  position: relative;
+  pointer-events: none;
 }
-.progress-track:hover .progress-fill { background: var(--accent2); }
-.progress-track:hover .progress-handle { opacity: 1; }
 
+.progress-track:hover .progress-fill { background: var(--accent2); }
+.progress-track:hover .progress-handle,
+.progress-track.dragging .progress-handle { opacity: 1; }
+.progress-track.dragging { cursor: grabbing; }
+
+/* Phần fill màu xanh */
 .progress-fill {
-  height: 100%;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 4px;
   width: 35%;
   background: var(--accent);
   border-radius: 4px;
   pointer-events: none;
   transition: background 0.15s;
+}
+
+/* Chấm tròn handle — nằm ở đầu phải của fill */
+.progress-handle {
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);  /* căn giữa chính nó tại điểm left */
+  left: 35%;                          /* JS sẽ override = progress% */
+  width: 12px; height: 12px;
+  background: #fff;
+  border-radius: 50%;
+  opacity: 0;
+  transition: opacity 0.15s;
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* Volume */
+.vol-track {
+  width: 90px; height: 4px;
+  background: var(--border);
+  border-radius: 4px;
+  cursor: pointer;
   position: relative;
 }
-.progress-handle {
+
+.vol-track:hover .vol-fill { background: var(--accent2); }
+
+.vol-fill {
+  height: 100%;
+  width: 70%;
+  background: var(--accent);
+  border-radius: 4px;
+  position: relative;
+  pointer-events: none;
+  transition: background 0.15s;
+}
+
+.vol-fill::after {
+  content: '';
   position: absolute;
   right: -6px; top: -4px;
   width: 12px; height: 12px;
@@ -487,46 +549,8 @@ ul { list-style: none; padding: 0; margin: 0; }
   transition: opacity 0.15s;
 }
 
-/* Volume */
-/* Volume */
-.vol-track {
-  position: relative;
-  width: 90px;
-  height: 4px;
-  background: var(--border);
-  border-radius: 4px;
-  cursor: pointer;
-}
+.vol-track:hover .vol-fill::after { opacity: 1; }
 
-.vol-fill {
-  position: relative;
-  height: 100%;
-  width: 70%;
-  background: var(--accent);
-  border-radius: 4px;
-  pointer-events: none;
-}
-
-.vol-handle {
-  position: absolute;
-  right: -6px;
-  top: -4px;
-  width: 12px;
-  height: 12px;
-  background: white;
-  border-radius: 50%;
-  opacity: 0;
-  transition: opacity 0.15s;
-}
-
-/* Hover effect */
-.vol-track:hover .vol-fill {
-  background: var(--accent2);
-}
-
-.vol-track:hover .vol-handle {
-  opacity: 1;
-}
 /* ========================
    Responsive (Bootstrap breakpoints)
    ======================== */
