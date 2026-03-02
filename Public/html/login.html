@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+	<title>SoundWave – Đăng nhập</title>
+
+	<!-- Bootstrap 5 -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+		crossorigin="anonymous" />
+
+	<!-- Custom CSS -->
+	<link rel="stylesheet" href="../css/login.css" />
+</head>
+
+<body>
+
+	<!-- Animated background blobs -->
+	<div class="bg-blob blob-1"></div>
+	<div class="bg-blob blob-2"></div>
+	<div class="bg-blob blob-3"></div>
+
+	<div class="page-wrapper">
+
+		<!-- Left panel: branding -->
+		<div class="brand-panel d-none d-lg-flex">
+			<div class="brand-content">
+				<div class="sw-logo mb-5">
+					<div class="sw-logo-icon">
+						<svg viewBox="0 0 24 24">
+							<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10
+              10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
+						</svg>
+					</div>
+					<span class="sw-logo-text">SoundWave</span>
+				</div>
+
+				<h1 class="brand-headline">Âm nhạc<br />dành riêng<br /><span>cho bạn.</span></h1>
+				<p class="brand-sub">Hàng triệu bài hát. Miễn phí.</p>
+
+				<!-- Floating music cards -->
+				<div class="floating-cards">
+					<div class="f-card fc1">
+						<span class="fc-emoji">🌙</span>
+						<div>
+							<div class="fc-name">渇愛エチュード</div>
+							<div class="fc-artist">YOASOBI</div>
+						</div>
+						<div class="fc-bars">
+							<span></span><span></span><span></span>
+						</div>
+					</div>
+					<div class="f-card fc2">
+						<span class="fc-emoji">🦊</span>
+						<div>
+							<div class="fc-name">V-Sound Hot</div>
+							<div class="fc-artist">Various</div>
+						</div>
+					</div>
+					<div class="f-card fc3">
+						<span class="fc-emoji">💜</span>
+						<div>
+							<div class="fc-name">K-Pop Now</div>
+							<div class="fc-artist">IVE, aespa...</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Right panel: form -->
+		<div class="form-panel">
+			<div class="form-box">
+
+				<!-- Mobile logo -->
+				<div class="sw-logo mb-4 d-flex d-lg-none justify-content-center">
+					<div class="sw-logo-icon">
+						<svg viewBox="0 0 24 24">
+							<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10
+              10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z" />
+						</svg>
+					</div>
+					<span class="sw-logo-text">SoundWave</span>
+				</div>
+
+				<!-- Tabs: Đăng nhập / Đăng ký -->
+				<div class="form-tabs mb-4">
+					<button class="form-tab active" id="tabLogin">Đăng nhập</button>
+					<button class="form-tab" id="tabRegister">Đăng ký</button>
+				</div>
+
+				<!-- Alert box -->
+				<div id="alertBox" class="sw-alert d-none"></div>
+
+				<!-- ── LOGIN FORM ── -->
+				<form id="loginForm" autocomplete="off">
+					<div class="sw-field mb-3">
+						<label>Email</label>
+						<div class="sw-input-wrap">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+								stroke-linecap="round">
+								<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2
+                  2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+								<polyline points="22,6 12,13 2,6" />
+							</svg>
+							<input type="email" id="loginEmail" placeholder="you@example.com" required />
+						</div>
+					</div>
+
+					<div class="sw-field mb-4">
+						<label>Mật khẩu</label>
+						<div class="sw-input-wrap">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+								stroke-linecap="round">
+								<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+								<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+							</svg>
+							<input type="password" id="loginPassword" placeholder="••••••••" required />
+							<button type="button" class="eye-btn" id="eyeLogin">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+									stroke-linecap="round">
+									<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11
+                    8-11-8-11-8z" />
+									<circle cx="12" cy="12" r="3" />
+								</svg>
+							</button>
+						</div>
+					</div>
+
+					<button type="submit" class="sw-btn w-100" id="loginBtn">
+						<span class="btn-text">Đăng nhập</span>
+						<span class="btn-spinner d-none"></span>
+					</button>
+				</form>
+
+				<!-- ── REGISTER FORM ── -->
+				<form id="registerForm" class="d-none" autocomplete="off">
+					<div class="sw-field mb-3">
+						<label>Tên người dùng</label>
+						<div class="sw-input-wrap">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+								stroke-linecap="round">
+								<path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+								<circle cx="12" cy="7" r="4" />
+							</svg>
+							<input type="text" id="regUsername" placeholder="soundwave_user" required />
+						</div>
+					</div>
+
+					<div class="sw-field mb-3">
+						<label>Email</label>
+						<div class="sw-input-wrap">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+								stroke-linecap="round">
+								<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2
+                  2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+								<polyline points="22,6 12,13 2,6" />
+							</svg>
+							<input type="email" id="regEmail" placeholder="you@example.com" required />
+						</div>
+					</div>
+
+					<div class="sw-field mb-3">
+						<label>Mật khẩu</label>
+						<div class="sw-input-wrap">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+								stroke-linecap="round">
+								<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+								<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+							</svg>
+							<input type="password" id="regPassword" placeholder="••••••••" required />
+							<button type="button" class="eye-btn" id="eyeReg">
+								<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+									stroke-linecap="round">
+									<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11
+                    8-11-8-11-8z" />
+									<circle cx="12" cy="12" r="3" />
+								</svg>
+							</button>
+						</div>
+						<!-- Password strength -->
+						<div class="strength-bar mt-2">
+							<div class="strength-fill" id="strengthFill"></div>
+						</div>
+						<div class="strength-label" id="strengthLabel"></div>
+					</div>
+
+					<div class="sw-field mb-4">
+						<label>Xác nhận mật khẩu</label>
+						<div class="sw-input-wrap">
+							<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+								stroke-linecap="round">
+								<rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+								<path d="M7 11V7a5 5 0 0 1 10 0v4" />
+							</svg>
+							<input type="password" id="regConfirm" placeholder="••••••••" required />
+						</div>
+					</div>
+
+					<button type="submit" class="sw-btn w-100" id="registerBtn">
+						<span class="btn-text">Tạo tài khoản</span>
+						<span class="btn-spinner d-none"></span>
+					</button>
+				</form>
+
+				<p class="terms mt-4">
+					Bằng cách tiếp tục, bạn đồng ý với
+					<a href="#">Điều khoản dịch vụ</a> và
+					<a href="#">Chính sách bảo mật</a> của SoundWave.
+				</p>
+
+			</div>
+		</div>
+
+	</div><!-- /page-wrapper -->
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"
+		crossorigin="anonymous"></script>
+	<script src="../js/login.js"></script>
+</body>
+
+</html>

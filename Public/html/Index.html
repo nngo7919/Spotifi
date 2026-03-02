@@ -11,7 +11,7 @@
 		crossorigin="anonymous" />
 
 	<!-- Custom CSS -->
-	<link rel="stylesheet" href="Css/Style.css" />
+	<link rel="stylesheet" href="../css/style.css" />
 </head>
 
 <body>
@@ -159,18 +159,42 @@
                 5.59L12 20l8-8z" />
 							</svg>
 						</button>
-						<div class="search-box">
+						<div class="search-box" style="position:relative;">
 							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
 								stroke-width="2.5" stroke-linecap="round">
 								<circle cx="11" cy="11" r="8" />
 								<path d="m21 21-4.35-4.35" />
 							</svg>
-							<input type="text" placeholder="Bạn muốn nghe gì?" />
+							<input type="text" id="searchInput" placeholder="Bạn muốn nghe gì?" autocomplete="off" />
+							<!-- Search results dropdown -->
+							<div id="searchResults" class="search-dropdown"></div>
 						</div>
 					</div>
 
-					<!-- Right: premium btn -->
-					<button class="btn-premium">Khám phá Premium</button>
+					<!-- Right: premium btn + user menu -->
+					<div class="d-flex align-items-center gap-3">
+						<button class="btn-premium">Khám phá Premium</button>
+
+						<!-- User dropdown -->
+						<div class="user-menu" id="userMenu">
+							<button class="user-avatar" id="userAvatarBtn" title="Tài khoản">
+								<span id="userInitial">?</span>
+							</button>
+							<div class="user-dropdown" id="userDropdown">
+								<div class="user-dropdown-info">
+									<div class="ud-name" id="udName">--</div>
+									<div class="ud-email" id="udEmail">--</div>
+								</div>
+								<hr class="ud-divider" />
+								<a href="#" class="ud-item">Tài khoản</a>
+								<a href="#" class="ud-item">Hồ sơ</a>
+								<hr class="ud-divider" />
+								<button class="ud-item ud-logout" id="logoutBtn">
+									Đăng xuất
+								</button>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 
@@ -585,7 +609,7 @@
 		crossorigin="anonymous"></script>
 
 	<!-- Custom JS -->
-	<script src="Js/app.js"></script>
+	<script src="../js/script.js"></script>
 </body>
 
 </html>

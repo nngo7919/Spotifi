@@ -218,7 +218,157 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	});
 
+	/* ══════════════════════════════
+				AUTH - Kiểm tra đăng nhập
+				══════════════════════════════ */
+	const token = localStorage.getItem('sw_token');
+	const user = JSON.parse(localStorage.getItem('sw_user') || 'null');
+
+	// Nếu chưa đăng nhập → về trang login
+	if (!token || !user) {
+		window.location.href = '/html/login.html';
+	} else {
+		// Hiển thị chữ cái đầu của username lên avatar
+		const initial = user.username ? user.username[0].toUpperCase() : '?';
+		document.getElementById('userInitial').textContent = initial;
+		document.getElementById('udName').textContent = user.username;
+		document.getElementById('udEmail').textContent = user.email;
+	}
+
+	/* ── User dropdown toggle ── */
+	const userAvatarBtn = document.getElementById('userAvatarBtn');
+	const userDropdown = document.getElementById('userDropdown');
+
+	// Click ra ngoài → đóng dropdown (xử lý chung ở phần search bên dưới)
+	userAvatarBtn.addEventListener('click', (e) => {
+		e.stopPropagation();
+		userDropdown.classList.toggle('open');
+	});
+
+	/* ── Đăng xuất ── */
+	document.getElementById('logoutBtn').addEventListener('click', () => {
+		localStorage.removeItem('sw_token');
+		localStorage.removeItem('sw_user');
+		window.location.href = '/html/login.html';
+	});
+
+	/* ══════════════════════════════
+				SEARCH
+				══════════════════════════════ */
+	const searchInput = document.getElementById('searchInput');
+	const searchResults = document.getElementById('searchResults');
+	const API = 'http://localhost:3000/api';
+
+	let searchTimeout = null;
+
+	const typeLabel = { song: '🎵 Bài hát', artist: '🎤 Nghệ sĩ', album: '💿 Album' };
+	const typeEmoji = { song: '🎵', artist: '🎤', album: '💿' };
+
+	function renderResults(data) {
+		if (!data.length) {
+			searchResults.innerHTML = `<div class="search-empty">Không tìm thấy kết quả nào.</div>`;
+			return;
+		}
+
+		// Nhóm theo type
+		const groups = { song: [], artist: [], album: [] };
+		data.forEach(item => {
+			if (groups[item.type]) groups[item.type].push(item);
+		});
+
+		let html = '';
+		for (const [type, items] of Object.entries(groups)) {
+			if (!items.length) continue;
+			html += `<div class="search-section-label">${typeLabel[type]}</div>`;
+			items.slice(0, 4).forEach(item => {
+				html += `
+          <div class="search-item" data-track="${item.name}" data-artist="${item.artist || ''}" data-emoji="${typeEmoji[type]}">
+            <div class="search-item-thumb ${type === 'artist' ? 'artist' : ''}">
+              ${item.image
+						? `<img src="${item.image}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.parentElement.textContent='${typeEmoji[type]}'">`
+						: typeEmoji[type]}
+            </div>
+            <div class="search-item-info">
+              <div class="search-item-name">${item.name}</div>
+              <div class="search-item-sub">${item.artist || ''}</div>
+            </div>
+            <div class="search-item-type">${type}</div>
+          </div>`;
+			});
+		}
+
+		searchResults.innerHTML = html;
+
+		// Click item → phát nhạc
+		searchResults.querySelectorAll('.search-item').forEach(el => {
+			el.addEventListener('click', () => {
+				playTrack(
+					el.dataset.track,
+					el.dataset.artist || 'SoundWave',
+					el.dataset.emoji || '🎵'
+				);
+				searchInput.value = el.dataset.track;
+				searchResults.classList.remove('open');
+			});
+		});
+	}
+
+	async function doSearch(keyword) {
+		searchResults.innerHTML = `
+      <div class="search-loading">
+        <div class="search-spinner"></div> Đang tìm...
+      </div>`;
+		searchResults.classList.add('open');
+
+		try {
+			const res = await fetch(`${API}/songs/search?q=${encodeURIComponent(keyword)}`);
+			const data = await res.json();
+			renderResults(data);
+		} catch {
+			searchResults.innerHTML = `<div class="search-empty">Lỗi kết nối server.</div>`;
+		}
+	}
+
+	// Gõ → debounce 400ms rồi mới search
+	searchInput.addEventListener('input', () => {
+		const keyword = searchInput.value.trim();
+		clearTimeout(searchTimeout);
+
+		if (!keyword) {
+			searchResults.classList.remove('open');
+			return;
+		}
+
+		searchTimeout = setTimeout(() => doSearch(keyword), 400);
+	});
+
+	// Focus → mở lại nếu có kết quả cũ
+	searchInput.addEventListener('focus', () => {
+		if (searchInput.value.trim() && searchResults.innerHTML) {
+			searchResults.classList.add('open');
+		}
+	});
+
+	// Click ra ngoài → đóng search
+	document.addEventListener('click', (e) => {
+		if (!searchInput.contains(e.target) && !searchResults.contains(e.target)) {
+			searchResults.classList.remove('open');
+		}
+		// Đóng cả user dropdown
+		userDropdown.classList.remove('open');
+	});
+
+	// Phím ESC → đóng search
+	searchInput.addEventListener('keydown', (e) => {
+		if (e.key === 'Escape') {
+			searchResults.classList.remove('open');
+			searchInput.blur();
+		}
+	});
+
+
 	/* ── Init ── */
 	updateProgressUI();
 	updateVolumeUI();
+
 });

@@ -1,25 +1,62 @@
-const express = require("express");
-const router = express.Router();
-const db = require("../db");
 
-// GET all songs
-router.get("/", (req, res) => {
-	db.query("SELECT * FROM songs", (err, results) => {
-		if (err) return res.status(500).json(err);
-		res.json(results);
-	});
+const express = require('express');
+const router = express.Router();
+const db = require('../db');
+const { verifyToken,
+	optionalToken } = require('../middleware/auth');
+
+// GET /api/songs — public
+router.get('/', optionalToken, async (req, res) => {
+	try {
+		const songs = await db.getAllSongs();
+		res.json(songs);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
 });
 
-// POST new song
-router.post("/", (req, res) => {
-	const { title, artist, file_url, cover_url } = req.body;
+// GET /api/songs/top — public
+router.get('/top', async (req, res) => {
+	try {
+		const limit = parseInt(req.query.limit) || 10;
+		const songs = await db.getTopSongs(limit);
+		res.json(songs);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
 
-	const sql = "INSERT INTO songs (title, artist, file_url, cover_url) VALUES (?, ?, ?, ?)";
+// GET /api/songs/search?q=keyword — public
+router.get('/search', async (req, res) => {
+	try {
+		const keyword = req.query.q || '';
+		if (!keyword) return res.json([]);
+		const results = await db.search(keyword);
+		res.json(results);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
 
-	db.query(sql, [title, artist, file_url, cover_url], (err, result) => {
-		if (err) return res.status(500).json(err);
-		res.json({ message: "Song added" });
-	});
+// GET /api/songs/:id — public
+router.get('/:id', async (req, res) => {
+	try {
+		const song = await db.getSongById(req.params.id);
+		if (!song) return res.status(404).json({ error: 'Không tìm thấy bài hát' });
+		res.json(song);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// POST /api/songs/:id/play — cần login
+router.post('/:id/play', verifyToken, async (req, res) => {
+	try {
+		await db.recordPlay(req.user.userId, req.params.id);
+		res.json({ success: true });
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
 });
 
 module.exports = router;
