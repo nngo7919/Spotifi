@@ -1,0 +1,100 @@
+project sẽ có 
+
+
+✅ 3. Artist Page
+
+Ảnh artist
+
+Top 5 bài nổi bật
+
+Danh sách album
+
+Danh sách bài
+
+✅ 4. Album Page
+
+Cover
+
+Ngày phát hành
+
+Danh sách bài
+
+Tổng thời lượng
+
+✅ 5. Playlist System
+
+Tạo playlist
+
+Thêm bài
+
+Xóa bài
+
+Rename playlist
+
+Play toàn playlist
+
+Ảnh playlist
+
+✅ 6. Like System
+
+Like song
+
+Trang “Liked Songs”
+
+Count like
+
+✅ 7. History + Recommendation
+
+Ghi play_history
+
+Recommendation theo:
+
+Top genre
+
+Most played
+
+Recently played
+
+✅ 8. Search Page giống Spotify
+
+Phân nhóm:
+
+Songs
+
+Artists
+
+Albums
+
+Click → load SPA
+
+✅ 9. Persistent Player (giống thật)
+
+Player không reset khi đổi trang
+
+Lưu queue trong memory
+
+Có thanh progress
+
+Có volume
+
+Có thời gian chạy
+
+
+những điều cần sửa :
+thanh PROGRESS
+- phần player chỉ chạy mục có id thuộc table song hoặc table podcast )
+- phần player sẽ thay đổi trên bài hát hoặc podcast được phát trong queue system . khi bấm repeat thì sẽ giữ nguyên.
+- khi bấm vào bài hát đang được phát thì nó sẽ chuyển sang trang lyric. ( lyric feature )
+thư viện
+- thư viện hiện like song , play list và followed arists
+- khi bấm vào album thì ra album page , khi bấm vào arists thì ra arists page , bấm vào playlist thì sẽ ra playlist page
+main page 
+- bỏ tag nghệ sĩ 
+- ở tag tất cả sẽ là main page (bao gồm : play history ,nghệ sĩ nổi bật , hiện những gì music page và podcast page có )
+- ở tag nhạc sẽ là music page ( bao gồm : recomment song , remcomment album dựa trên table like song , play-history . song or album of followed artists, top 10 song most listend , top 10 album list listend .
+- ở tag podcast sẽ là podcast page ( bao gồm recomment podcast  , podcast of podcast followed )
+search page
+- khi bấm vào bài hát sẽ ra trang lyric
+- khi bấm vào album sẽ ra album page
+- khi bấm vào nghệ sĩ sẽ ra nghệ sĩ page
+- khi bấm vào podcast sẽ ra podcast page

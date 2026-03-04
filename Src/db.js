@@ -1,5 +1,10 @@
+// =============================================
+//  SoundWave - db.js
+//  Kết nối MySQL + tất cả hàm truy vấn
+//  Cài đặt: npm install mysql2
+// =============================================
+
 const mysql = require('mysql2/promise');
-require('dotenv').config();
 
 // ─────────────────────────────────────────────
 // KẾT NỐI DATABASE
@@ -7,8 +12,8 @@ require('dotenv').config();
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '1234',
-  database: process.env.DB_NAME || 'spotifi',
+  password: process.env.DB_PASSWORD || '',
+  database: process.env.DB_NAME || 'soundwave',
   waitForConnections: true,
   connectionLimit: 10,
 });
@@ -77,7 +82,9 @@ async function getTopSongs(limit = 10) {
   return query(`
     SELECT
       s.id, s.title, s.duration, s.plays_count,
-      a.name AS artist_name,
+      a.id         AS artist_id,
+      a.name       AS artist_name,
+      a.avatar_url AS artist_avatar,
       al.title     AS album_title,
       al.cover_url AS album_cover
     FROM songs s
@@ -151,9 +158,13 @@ async function getArtistById(artistId) {
 
   const songs = await query(`
     SELECT s.id, s.title, s.duration, s.plays_count,
-           al.title AS album_title, al.cover_url
+           s.file_url,
+           a.name       AS artist_name,
+           al.title     AS album_title,
+           al.cover_url AS album_cover
     FROM songs s
-    LEFT JOIN albums al ON s.album_id = al.id
+    JOIN artists a      ON s.artist_id = a.id
+    LEFT JOIN albums al ON s.album_id  = al.id
     WHERE s.artist_id = ?
     ORDER BY al.release_date DESC, s.track_number
   `, [artistId]);

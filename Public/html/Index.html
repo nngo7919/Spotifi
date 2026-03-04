@@ -240,6 +240,21 @@
 					</div>
 				</div>
 
+				<!-- Section: Artists — load từ API -->
+				<div class="mb-5">
+					<div class="d-flex justify-content-between align-items-center mb-3">
+						<h2 class="section-title m-0">Nghệ sĩ nổi bật</h2>
+						<a href="#" class="see-all">Hiện tất cả</a>
+					</div>
+					<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-5 row-cols-xl-6 g-3"
+						id="artistsGrid">
+						<!-- JS sẽ render vào đây -->
+						<div class="col-12 text-center py-3" style="color:var(--text-dim);font-size:13px;">
+							Đang tải nghệ sĩ...
+						</div>
+					</div>
+				</div>
+
 				<!-- Section: New releases -->
 				<div class="mb-5">
 					<div class="d-flex justify-content-between align-items-center mb-3">
@@ -504,6 +519,61 @@
 				</div>
 
 			</div><!-- /px-4 -->
+
+			<!-- ==============================
+         ARTIST PAGE (SPA)
+         ============================== -->
+			<div id="artistPage" style="display:none;">
+
+				<!-- Hero banner -->
+				<div class="artist-hero" id="artistHero">
+					<div class="artist-hero-overlay"></div>
+					<div class="artist-hero-info">
+						<div class="artist-verified" id="artistVerified" style="display:none;">
+							<svg viewBox="0 0 24 24" fill="#1db954" width="16" height="16">
+								<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" />
+							</svg>
+							Nghệ sĩ được xác minh
+						</div>
+						<div class="artist-hero-avatar" id="artistAvatar"></div>
+						<h1 class="artist-hero-name" id="artistName">--</h1>
+						<p class="artist-hero-followers" id="artistFollowers"></p>
+						<div class="d-flex align-items-center gap-3 mt-4">
+							<button class="sw-btn-play" id="artistPlayAllBtn">
+								<svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+									<path d="M8 5v14l11-7z" />
+								</svg>
+								Phát tất cả
+							</button>
+							<button class="btn-follow" id="artistFollowBtn">Theo dõi</button>
+						</div>
+					</div>
+				</div>
+
+				<div class="px-4 py-4">
+
+					<!-- Top 5 bài nổi bật -->
+					<div class="mb-5">
+						<h2 class="section-title mb-3">Nổi bật</h2>
+						<div id="artistTopSongs"></div>
+					</div>
+
+					<!-- Danh sách album -->
+					<div class="mb-5">
+						<h2 class="section-title mb-3">Album</h2>
+						<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-xl-6 g-3" id="artistAlbums">
+						</div>
+					</div>
+
+					<!-- Tất cả bài hát -->
+					<div class="mb-5">
+						<h2 class="section-title mb-3">Tất cả bài hát</h2>
+						<div id="artistAllSongs"></div>
+					</div>
+
+				</div>
+			</div><!-- /artistPage -->
+
 		</main>
 
 		<!-- ==============================
@@ -571,7 +641,7 @@
 						<div class="progress-fill" id="progressFill"></div>
 						<div class="progress-handle"></div>
 					</div>
-					<span class="time-label">3:58</span>
+					<span class="time-label" id="timeEnd">0:00</span>
 				</div>
 			</div>
 
@@ -601,6 +671,9 @@
 			</div>
 
 		</footer>
+
+		<!-- Audio player ẩn — dùng để stream nhạc thật -->
+		<audio id="audioPlayer" preload="metadata" style="display:none;"></audio>
 
 	</div><!-- /#app -->
 

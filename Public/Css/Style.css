@@ -783,3 +783,284 @@ ul { list-style: none; padding: 0; margin: 0; }
   border-radius: 50%;
   animation: spin 0.7s linear infinite;
 }
+
+/* ========================
+   PLAYING HIGHLIGHT
+   ======================== */
+[data-song-id].playing .card-title,
+[data-song-id].playing .fc-name {
+  color: var(--accent) !important;
+}
+
+[data-song-id].playing .card-thumb-wrap::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  border: 2px solid var(--accent);
+  pointer-events: none;
+}
+
+[data-song-id].playing .play-btn-overlay {
+  opacity: 1 !important;
+  transform: translateY(0) !important;
+}
+
+/* Nhấp nháy nhẹ khi đang phát */
+@keyframes pulseGreen {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(29,185,84,0.4); }
+  50%       { box-shadow: 0 0 0 6px rgba(29,185,84,0); }
+}
+
+[data-song-id].playing .card-thumb-wrap {
+  animation: pulseGreen 2s ease infinite;
+}
+
+/* ========================
+   ARTIST PAGE
+   ======================== */
+
+/* Hero */
+.artist-hero {
+  position: relative;
+  min-height: 340px;
+  display: flex;
+  align-items: flex-end;
+  background: linear-gradient(135deg, #1a3a1a, #0a0a0a);
+  overflow: hidden;
+}
+
+.artist-hero-bg {
+  position: absolute;
+  inset: 0;
+  background-size: cover;
+  background-position: center top;
+  filter: blur(2px) brightness(0.4);
+  transform: scale(1.05);
+}
+
+.artist-hero-overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(10,10,10,0.95) 0%, rgba(10,10,10,0.3) 60%, transparent 100%);
+}
+
+.artist-hero-info {
+  position: relative;
+  z-index: 2;
+  padding: 40px 32px 32px;
+  width: 100%;
+}
+
+.artist-verified {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+
+.artist-hero-avatar {
+  width: 140px; height: 140px;
+  border-radius: 50%;
+  background: var(--card-hover);
+  font-size: 60px;
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+  border: 3px solid rgba(255,255,255,0.1);
+  overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+}
+
+.artist-hero-avatar img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+
+.artist-hero-name {
+  font-size: 52px;
+  font-weight: 900;
+  letter-spacing: -1px;
+  margin: 0 0 8px;
+  line-height: 1;
+}
+
+.artist-hero-followers {
+  font-size: 14px;
+  color: var(--text-dim);
+  font-weight: 600;
+  margin: 0;
+}
+
+/* Play all button */
+.sw-btn-play {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.sw-btn-play:hover {
+  background: var(--accent2);
+  transform: scale(1.06);
+  box-shadow: 0 8px 24px rgba(29,185,84,0.4);
+}
+.sw-btn-play svg { fill: #000; margin-left: 2px; }
+
+/* Follow button */
+.btn-follow {
+  padding: 10px 24px;
+  border: 1px solid rgba(255,255,255,0.4);
+  border-radius: 50px;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+.btn-follow:hover { border-color: #fff; }
+.btn-follow.following {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #000;
+}
+
+/* Song row */
+.song-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.12s;
+  position: relative;
+}
+.song-row:hover { background: rgba(255,255,255,0.07); }
+.song-row.playing { background: rgba(29,185,84,0.08); }
+.song-row.playing .song-row-title { color: var(--accent); }
+
+.song-row-num {
+  width: 28px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+}
+.song-row.playing .song-row-num { color: var(--accent); }
+
+.song-row-thumb {
+  width: 44px; height: 44px;
+  border-radius: 6px;
+  flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px;
+  background: var(--card-hover);
+  overflow: hidden;
+}
+.song-row-thumb img { width: 100%; height: 100%; object-fit: cover; }
+
+.song-row-info { flex: 1; overflow: hidden; }
+.song-row-title {
+  font-size: 14px; font-weight: 700;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.song-row-artist {
+  font-size: 12px; color: var(--text-dim); margin-top: 2px;
+}
+
+.song-row-duration {
+  font-size: 12px;
+  color: var(--text-dim);
+  font-weight: 600;
+  flex-shrink: 0;
+}
+
+/* Album card trong artist page */
+.album-card {
+  cursor: pointer;
+  padding: 14px;
+  background: var(--card);
+  border-radius: 10px;
+  transition: background 0.15s;
+}
+.album-card:hover { background: var(--card-hover); }
+.album-card-thumb {
+  width: 100%; aspect-ratio: 1;
+  border-radius: 8px;
+  margin-bottom: 12px;
+  font-size: 40px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--card-hover);
+  overflow: hidden;
+}
+.album-card-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.album-card-title {
+  font-size: 13px; font-weight: 800;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.album-card-year {
+  font-size: 12px; color: var(--text-dim); margin-top: 4px;
+}
+
+/* Back button */
+.btn-back-artist {
+  background: rgba(0,0,0,0.5);
+  border: none;
+  color: var(--text);
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.btn-back-artist:hover { background: rgba(0,0,0,0.8); }
+
+/* ========================
+   ARTIST CARD (trang chủ)
+   ======================== */
+.artist-card {
+  cursor: pointer;
+  padding: 14px;
+  background: var(--card);
+  border-radius: 10px;
+  text-align: center;
+  transition: background 0.15s;
+}
+.artist-card:hover { background: var(--card-hover); }
+
+.artist-card-avatar {
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 50%;
+  background: var(--border);
+  margin: 0 auto 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  overflow: hidden;
+}
+.artist-card-avatar img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+}
+.artist-card-name {
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.artist-card-label {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-top: 4px;
+}

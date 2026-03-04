@@ -1,3 +1,8 @@
+// =============================================
+//  SoundWave - server.js
+//  Cài đặt: npm install express cors dotenv
+//  Chạy:    node server.js
+// =============================================
 
 require('dotenv').config();
 const express = require('express');
@@ -9,10 +14,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// ── Serve file HTML/CSS/JS tĩnh từ thư mục frontend ──
-// Cấu trúc thư mục:
-//   soundwave-server/   ← backend (server.js ở đây)
-//   soundwave/          ← frontend (index.html, login.html...)
+// ── Serve file HTML/CSS/JS tĩnh từ thư mục Public ──
 app.use(express.static(path.join(__dirname, '../Public')));
 
 // ── API Routes ──
@@ -22,6 +24,7 @@ app.use('/api/artists', require('./routes/artists'));
 app.use('/api/playlists', require('./routes/playlists'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/auth', require('./routes/auth'));
+app.use('/api/stream', require('./routes/stream'));
 
 // ── Mọi route khác → trả về login.html ──
 app.get('/{*path}', (req, res) => {
