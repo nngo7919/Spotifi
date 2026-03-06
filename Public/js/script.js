@@ -851,27 +851,51 @@ document.addEventListener('DOMContentLoaded', () => {
 	loadHomeArtists();
 
 	async function loadHomeArtists() {
+		const grid = document.getElementById('artistsGrid');
 		try {
-			const res = await fetch(`${API}/songs/top?limit=20`);
-			const songs = await res.json();
+			// Gọi song song cả 2 API
+			const [topRes, followRes] = await Promise.all([
+				fetch(`${API}/songs/top?limit=10`),
+				fetch(`${API}/users/${user.id}/following`, {
+					headers: { 'Authorization': `Bearer ${token}` }
+				})
+			]);
 
-			// Lấy unique artist từ top songs
-			const seen = new Set();
-			const artists = [];
-			songs.forEach(s => {
-				if (!seen.has(s.artist_id)) {
-					seen.add(s.artist_id);
-					artists.push({ id: s.artist_id, name: s.artist_name, avatar: s.artist_avatar });
+			const topSongs = await topRes.json();
+			const followedRaw = followRes.ok ? await followRes.json() : [];
+
+			// Map followed artists
+			const followedArtists = followedRaw.map(a => ({
+				id: a.id,
+				name: a.name,
+				avatar: a.avatar_url,
+				followed: true,
+			}));
+
+			// Lấy unique artist từ top 10 songs
+			const seen = new Set(followedArtists.map(a => String(a.id)));
+			const topArtists = [];
+			topSongs.forEach(s => {
+				if (!seen.has(String(s.artist_id))) {
+					seen.add(String(s.artist_id));
+					topArtists.push({
+						id: s.artist_id,
+						name: s.artist_name,
+						avatar: s.artist_avatar,
+						followed: false,
+					});
 				}
 			});
 
-			const grid = document.getElementById('artistsGrid');
+			// Merge: followed trước, top sau
+			const artists = [...followedArtists, ...topArtists];
+
 			if (!artists.length) {
 				grid.innerHTML = '<div class="col-12" style="color:var(--text-dim);font-size:13px;text-align:center;">Chưa có nghệ sĩ.</div>';
 				return;
 			}
 
-			grid.innerHTML = artists.slice(0, 6).map(a => `
+			grid.innerHTML = artists.slice(0, 12).map(a => `
         <div class="col">
           <div class="artist-card" data-artist-id="${a.id}">
             <div class="artist-card-avatar">
@@ -880,14 +904,15 @@ document.addEventListener('DOMContentLoaded', () => {
 					: '🎤'}
             </div>
             <div class="artist-card-name">${a.name}</div>
-            <div class="artist-card-label">Nghệ sĩ</div>
+            <div class="artist-card-label" style="${a.followed ? 'color:var(--accent)' : ''}">
+              ${a.followed ? '✓ Đang theo dõi' : 'Nghệ sĩ'}
+            </div>
           </div>
         </div>`).join('');
 
 		} catch (err) {
 			console.error('loadHomeArtists error:', err);
-			document.getElementById('artistsGrid').innerHTML =
-				'<div class="col-12" style="color:var(--text-dim);font-size:13px;text-align:center;">Không thể tải nghệ sĩ.</div>';
+			grid.innerHTML = '<div class="col-12" style="color:var(--text-dim);font-size:13px;text-align:center;">Không thể tải nghệ sĩ.</div>';
 		}
 	}
 
