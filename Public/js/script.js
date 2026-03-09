@@ -847,8 +847,100 @@ document.addEventListener('DOMContentLoaded', () => {
 	updateProgressUI();
 	updateVolumeUI();
 
-	// Load danh sách nghệ sĩ lên trang chủ
+	// Load top 10 + danh sách nghệ sĩ lên trang chủ
+	loadTop10();
 	loadHomeArtists();
+
+	async function loadTop10() {
+		const list = document.getElementById('top10List');
+		try {
+			const res = await fetch(`${API}/songs/top?limit=10`);
+
+			// Debug: xem server trả về gì
+			console.log('Top10 status:', res.status);
+			const songs = await res.json();
+			console.log('Top10 data:', songs);
+
+			if (!Array.isArray(songs) || !songs.length) {
+				list.innerHTML = '<div style="color:var(--text-dim);padding:12px;">Chưa có dữ liệu. (API trả về rỗng)</div>';
+				return;
+			}
+
+			const maxPlays = Math.max(...songs.map(s => s.plays_count || 0), 1);
+
+			list.innerHTML = songs.map((s, i) => {
+				const isTop3 = i < 3;
+				const barWidth = Math.max(10, Math.round((s.plays_count || 0) / maxPlays * 100));
+				const rankColor = i === 0 ? '#FFD700' : i === 1 ? '#C0C0C0' : i === 2 ? '#CD7F32' : 'var(--text-dim)';
+
+				return `
+          <div class="top10-row"
+            data-song-id="${s.id}"
+            data-track="${s.title}"
+            data-artist="${s.artist_name || ''}"
+            data-emoji="🎵">
+            <!-- Rank -->
+            <div class="top10-rank" style="color:${rankColor}">
+              ${isTop3
+						? `<svg viewBox="0 0 24 24" fill="${rankColor}" width="14" height="14" style="margin-bottom:1px"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>`
+						: i + 1}
+            </div>
+
+            <!-- Thumb -->
+            <div class="top10-thumb">
+              ${s.album_cover
+						? `<img src="${s.album_cover}" alt="" onerror="this.parentElement.textContent='🎵'">`
+						: '🎵'}
+            </div>
+
+            <!-- Info -->
+            <div class="top10-info">
+              <div class="top10-title">${s.title}</div>
+              <div class="top10-artist">${s.artist_name || ''}</div>
+              <!-- Plays bar -->
+              <div class="top10-bar-wrap">
+                <div class="top10-bar-fill" style="width:${barWidth}%"></div>
+              </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="top10-stats">
+              <div class="top10-plays">${formatPlays(s.plays_count)}</div>
+              <div class="top10-duration">${secondsToMMSS(s.duration)}</div>
+            </div>
+
+            <!-- Play overlay -->
+            <div class="top10-play-overlay">
+              <svg viewBox="0 0 24 24" fill="#000"><path d="M8 5v14l11-7z"/></svg>
+            </div>
+          </div>`;
+			}).join('');
+
+			// Click row → phát nhạc
+			list.querySelectorAll('.top10-row').forEach((row, i) => {
+				row.addEventListener('click', () => {
+					const allSongs = songs.map(s => ({
+						id: s.id,
+						title: s.title,
+						artist: s.artist_name || '',
+						emoji: '🎵',
+					}));
+					window.playCollection(allSongs, i);
+				});
+			});
+
+		} catch (err) {
+			list.innerHTML = '<div style="color:var(--text-dim);padding:12px;">Không thể tải dữ liệu.</div>';
+			console.error('loadTop10 error:', err);
+		}
+	}
+
+	function formatPlays(n) {
+		if (!n) return '0 lượt';
+		if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M lượt';
+		if (n >= 1000) return (n / 1000).toFixed(1) + 'K lượt';
+		return n + ' lượt';
+	}
 
 	async function loadHomeArtists() {
 		const grid = document.getElementById('artistsGrid');
@@ -861,7 +953,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				})
 			]);
 
-			const topSongs = await topRes.json();
+			const topJson = await topRes.json();
+			const topSongs = Array.isArray(topJson) ? topJson : [];
 			const followedRaw = followRes.ok ? await followRes.json() : [];
 
 			// Map followed artists

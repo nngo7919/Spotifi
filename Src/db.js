@@ -12,8 +12,8 @@ const mysql = require('mysql2/promise');
 const pool = mysql.createPool({
   host: process.env.DB_HOST || 'localhost',
   user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || 'soundwave',
+  password: process.env.DB_PASSWORD || '1234',
+  database: process.env.DB_NAME || 'spotifi',
   waitForConnections: true,
   connectionLimit: 10,
 });
@@ -77,11 +77,13 @@ async function incrementPlays(songId) {
   );
 }
 
-// Top 10 bài nghe nhiều nhất
+// Top 10 bài nghe nhiều nhất (kể cả plays_count = 0)
 async function getTopSongs(limit = 10) {
+  const safeLimit = parseInt(limit, 10) || 10; // đảm bảo luôn là integer
   return query(`
     SELECT
-      s.id, s.title, s.duration, s.plays_count,
+      s.id, s.title, s.duration,
+      COALESCE(s.plays_count, 0) AS plays_count,
       a.id         AS artist_id,
       a.name       AS artist_name,
       a.avatar_url AS artist_avatar,
@@ -90,9 +92,9 @@ async function getTopSongs(limit = 10) {
     FROM songs s
     JOIN artists a      ON s.artist_id = a.id
     LEFT JOIN albums al ON s.album_id  = al.id
-    ORDER BY s.plays_count DESC
-    LIMIT ?
-  `, [limit]);
+    ORDER BY plays_count DESC, s.id ASC
+    LIMIT ${safeLimit}
+  `);
 }
 
 // Tìm kiếm bài hát / nghệ sĩ / album
@@ -152,7 +154,7 @@ async function getAlbumById(albumId) {
 // Lấy nghệ sĩ theo id + tất cả bài hát
 async function getArtistById(artistId) {
   const artist = await query(
-    'SELECT * FROM artists WHERE id = ?',
+    'SELECT id, name, bio, avatar_url, country, verified FROM artists WHERE id = ?',
     [artistId]
   );
 
@@ -311,6 +313,7 @@ async function isSongLiked(userId, songId) {
 
 // Lấy lịch sử nghe của user
 async function getPlayHistory(userId, limit = 20) {
+  const safeLimit = parseInt(limit, 10) || 20;
   return query(`
     SELECT
       ph.id, ph.played_at,
@@ -325,8 +328,8 @@ async function getPlayHistory(userId, limit = 20) {
     LEFT JOIN albums al ON s.album_id = al.id
     WHERE ph.user_id = ?
     ORDER BY ph.played_at DESC
-    LIMIT ?
-  `, [userId, limit]);
+    LIMIT ${safeLimit}
+  `, [userId]);
 }
 
 // Ghi lại lượt nghe
@@ -383,6 +386,7 @@ async function toggleFollowArtist(userId, artistId) {
 
 // Đề xuất dựa trên thể loại hay nghe
 async function getRecommendations(userId, limit = 20) {
+  const safeLimit = parseInt(limit, 10) || 20;
   return query(`
     SELECT DISTINCT
       s.id, s.title, s.duration,
@@ -406,8 +410,8 @@ async function getRecommendations(userId, limit = 20) {
       SELECT song_id FROM play_history WHERE user_id = ?
     )
     ORDER BY s.plays_count DESC
-    LIMIT ?
-  `, [userId, userId, limit]);
+    LIMIT ${safeLimit}
+  `, [userId, userId]);
 }
 
 // ─────────────────────────────────────────────
@@ -439,6 +443,7 @@ async function getUserById(userId) {
 
 // Lấy bài hát theo thể loại
 async function getSongsByGenre(genreName, limit = 50) {
+  const safeLimit = parseInt(limit, 10) || 50;
   return query(`
     SELECT
       s.id, s.title, s.duration, s.plays_count,
@@ -452,8 +457,8 @@ async function getSongsByGenre(genreName, limit = 50) {
     LEFT JOIN albums al ON s.album_id   = al.id
     WHERE g.name = ?
     ORDER BY s.plays_count DESC
-    LIMIT ?
-  `, [genreName, limit]);
+    LIMIT ${safeLimit}
+  `, [genreName]);
 }
 
 // ─────────────────────────────────────────────

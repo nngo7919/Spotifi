@@ -227,3 +227,118 @@ registerForm.addEventListener('submit', async (e) => {
 		window.location.href = '/html/index.html';
 	}
 })();
+
+// ── FORGOT PASSWORD ────────────────────────────
+const forgotForm = document.getElementById('forgotForm');
+const forgotLink = document.getElementById('forgotLink');
+const backToLogin = document.getElementById('backToLogin');
+const forgotEmail = document.getElementById('forgotEmail');
+const forgotNewPassword = document.getElementById('forgotNewPassword');
+const forgotConfirm = document.getElementById('forgotConfirm');
+const forgotBtn = document.getElementById('forgotBtn');
+const forgotStrengthFill = document.getElementById('forgotStrengthFill');
+const forgotStrengthLabel = document.getElementById('forgotStrengthLabel');
+
+// Các form hiện tại
+const allForms = [loginForm, registerForm, forgotForm];
+
+function showForm(formToShow) {
+	allForms.forEach(f => f.classList.add('d-none'));
+	formToShow.classList.remove('d-none');
+	hideAlert();
+}
+
+// Click "Quên mật khẩu?" → hiện forgot form
+forgotLink.addEventListener('click', (e) => {
+	e.preventDefault();
+	// Prefill email nếu đã nhập
+	if (loginEmail.value) forgotEmail.value = loginEmail.value;
+	// Ẩn tabs khi vào forgot
+	document.querySelector('.form-tabs').style.opacity = '0.3';
+	document.querySelector('.form-tabs').style.pointerEvents = 'none';
+	showForm(forgotForm);
+});
+
+// Nút ← quay lại login
+backToLogin.addEventListener('click', () => {
+	document.querySelector('.form-tabs').style.opacity = '';
+	document.querySelector('.form-tabs').style.pointerEvents = '';
+	showForm(loginForm);
+	tabLogin.classList.add('active');
+	tabRegister.classList.remove('active');
+});
+
+// Password strength cho forgot form
+forgotNewPassword.addEventListener('input', () => {
+	const val = forgotNewPassword.value;
+	let score = 0;
+	if (val.length >= 8) score++;
+	if (/[A-Z]/.test(val)) score++;
+	if (/[0-9]/.test(val)) score++;
+	if (/[^A-Za-z0-9]/.test(val)) score++;
+
+	const levels = [
+		{ pct: 0, color: '', label: '' },
+		{ pct: 25, color: '#e74c3c', label: '😟 Rất yếu' },
+		{ pct: 50, color: '#f39c12', label: '😐 Yếu' },
+		{ pct: 75, color: '#3498db', label: '🙂 Trung bình' },
+		{ pct: 100, color: '#1db954', label: '💪 Mạnh' },
+	];
+	const lv = levels[score] || levels[0];
+	forgotStrengthFill.style.width = lv.pct + '%';
+	forgotStrengthFill.style.background = lv.color;
+	forgotStrengthLabel.textContent = lv.label;
+	forgotStrengthLabel.style.color = lv.color;
+});
+
+togglePassword(forgotNewPassword, document.getElementById('eyeForgotNew'));
+
+// Submit forgot form
+forgotForm.addEventListener('submit', async (e) => {
+	e.preventDefault();
+	hideAlert();
+
+	const email = forgotEmail.value.trim();
+	const newPassword = forgotNewPassword.value;
+	const confirm = forgotConfirm.value;
+
+	if (!validateEmail(email)) {
+		markError(forgotEmail);
+		return showAlert('Email không hợp lệ.');
+	}
+	if (newPassword.length < 6) {
+		markError(forgotNewPassword);
+		return showAlert('Mật khẩu mới phải có ít nhất 6 ký tự.');
+	}
+	if (newPassword !== confirm) {
+		markError(forgotConfirm);
+		return showAlert('Mật khẩu xác nhận không khớp.');
+	}
+
+	setLoading(forgotBtn, true);
+
+	try {
+		const res = await fetch(`${API}/auth/reset-password`, {
+			method: 'POST',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ email, newPassword }),
+		});
+		const data = await res.json();
+
+		if (!res.ok) {
+			showAlert(data.error || 'Đặt lại mật khẩu thất bại.');
+		} else {
+			showAlert('Đặt lại mật khẩu thành công! Đang chuyển đến đăng nhập...', 'success');
+			setTimeout(() => {
+				// Quay về login, prefill email
+				backToLogin.click();
+				loginEmail.value = email;
+				loginPassword.focus();
+			}, 1500);
+		}
+	} catch {
+		showAlert('Không thể kết nối đến server. Vui lòng thử lại.');
+	} finally {
+		setLoading(forgotBtn, false);
+	}
+});

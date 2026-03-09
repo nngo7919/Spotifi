@@ -1,3 +1,7 @@
+// =============================================
+//  routes/auth.js
+//  Cài thêm: npm install bcrypt jsonwebtoken
+// =============================================
 
 const express = require('express');
 const router = express.Router();
@@ -84,4 +88,33 @@ router.post('/login', async (req, res) => {
 	}
 });
 
-module.exports = router; 
+// POST /api/auth/reset-password — đặt lại mật khẩu
+router.post('/reset-password', async (req, res) => {
+	try {
+		const { email, newPassword } = req.body;
+
+		if (!email || !newPassword)
+			return res.status(400).json({ error: 'Vui lòng điền đầy đủ thông tin' });
+		if (newPassword.length < 6)
+			return res.status(400).json({ error: 'Mật khẩu phải có ít nhất 6 ký tự' });
+
+		// Kiểm tra email tồn tại
+		const rows = await db.query(
+			'SELECT id FROM users WHERE email = ?', [email]
+		);
+		if (rows.length === 0)
+			return res.status(404).json({ error: 'Email không tồn tại trong hệ thống' });
+
+		// Hash và cập nhật mật khẩu mới
+		const hashed = await bcrypt.hash(newPassword, 10);
+		await db.query(
+			'UPDATE users SET password = ? WHERE email = ?', [hashed, email]
+		);
+
+		res.json({ message: 'Đặt lại mật khẩu thành công!' });
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+module.exports = router;
