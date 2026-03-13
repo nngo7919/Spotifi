@@ -127,10 +127,22 @@ async function search(keyword) {
 // ALBUMS
 // ─────────────────────────────────────────────
 
+// Lấy tất cả album
+async function getAllAlbums() {
+  return query(`
+    SELECT al.id, al.title, al.cover_url, al.release_date, al.type,
+           a.id   AS artist_id,
+           a.name AS artist_name
+    FROM albums al
+    JOIN artists a ON al.artist_id = a.id
+    ORDER BY al.release_date DESC
+  `);
+}
+
 // Lấy album theo id + danh sách bài hát
 async function getAlbumById(albumId) {
   const album = await query(`
-    SELECT al.*, a.name AS artist_name, a.avatar_url AS artist_avatar
+    SELECT al.*, a.id AS artist_id, a.name AS artist_name, a.avatar_url AS artist_avatar
     FROM albums al
     JOIN artists a ON al.artist_id = a.id
     WHERE al.id = ?
@@ -473,6 +485,7 @@ module.exports = {
   search,
 
   // Albums
+  getAllAlbums,
   getAlbumById,
 
   // Artists

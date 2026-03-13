@@ -67,12 +67,134 @@ Có thanh progress
 Có volume
 
 Có thời gian chạy
+1️⃣ Core Playback System (Nền tảng phát nhạc) – Làm trước
 
+Đây là hệ thống bắt buộc để player hoạt động ổn định.
+
+Smart Audio Queue System
+Yêu cầu
+
+Player phải quản lý queue rõ ràng.
+
+Queue gồm: current song, next songs, history.
+
+Cách hoạt động
+
+Queue được quản lý bằng một cấu trúc dữ liệu trung tâm.
+Khi bài hiện tại kết thúc, hệ thống lấy bài tiếp theo trong queue và chuyển sang phát.
+
+Audio Buffer Queue
+Yêu cầu
+
+Player phải giữ buffer audio để tránh gián đoạn khi mạng chậm.
+
+Cách hoạt động
+
+Khi stream nhạc, trình duyệt tải dữ liệu từng phần (chunk).
+Buffer giữ sẵn một lượng dữ liệu audio để đảm bảo bài hát phát liên tục.
+
+Gapless Playback
+Yêu cầu
+
+Không có khoảng lặng giữa hai bài hát.
+
+Cách hoạt động
+
+Bài tiếp theo được chuẩn bị sẵn trong buffer.
+Khi bài hiện tại kết thúc, player chuyển sang bài mới ngay lập tức.
+
+2️⃣ Performance Optimization (Tối ưu hiệu năng)
+
+Sau khi player hoạt động ổn định thì thêm các hệ thống tăng tốc và giảm tải server.
+
+Smart Preload Next Song
+Yêu cầu
+
+Player phải tải trước bài tiếp theo trong queue.
+
+Cách hoạt động
+
+Khi bài hiện tại gần kết thúc (70–80%), hệ thống gửi request để tải trước bài tiếp theo.
+Nhờ vậy khi chuyển bài sẽ không có độ trễ.
+
+Metadata Preload
+Yêu cầu
+
+Preload thông tin bài hát trước khi user phát.
+
+Cách hoạt động
+
+Frontend tải metadata như title, artist, cover, duration trước khi audio được phát để UI hiển thị nhanh.
+
+Browser Cache
+Yêu cầu
+
+Trình duyệt phải cache file audio.
+
+Cách hoạt động
+
+Server gửi header cache cho file mp3.
+Khi user phát lại bài hát, dữ liệu có thể được lấy trực tiếp từ cache.
+
+Audio Cache System
+Yêu cầu
+
+Player phải lưu tạm audio đã phát gần đây.
+
+Cách hoạt động
+
+Audio đã stream được lưu vào cache hoặc memory.
+Nếu user phát lại bài vừa nghe, player có thể phát trực tiếp từ cache.
+
+3️⃣ Advanced Playback Features (Tính năng nâng cao)
+
+Các feature này giúp player mượt và chuyên nghiệp hơn.
+
+Crossfade + Double Audio Buffer
+Yêu cầu
+
+Player phải hỗ trợ crossfade giữa hai bài.
+
+Cách hoạt động
+
+Hai audio buffer được sử dụng đồng thời.
+Bài mới bắt đầu phát trước khi bài cũ kết thúc, volume của hai bài được điều chỉnh ngược chiều nhau.
+
+Volume Normalization
+Yêu cầu
+
+Âm lượng các bài hát phải được cân bằng.
+
+Cách hoạt động
+
+Player điều chỉnh gain của audio dựa trên thông tin loudness để đảm bảo các bài hát có mức âm lượng tương đương.
+
+4️⃣ Queue Interaction Features (Trải nghiệm người dùng)
+
+Các feature này giúp user tương tác với queue tốt hơn.
+
+Drag & Drop Queue
+Yêu cầu
+
+User có thể kéo thả bài trong queue để thay đổi thứ tự phát.
+
+Cách hoạt động
+
+Danh sách queue hỗ trợ drag & drop.
+Khi vị trí bài hát thay đổi, hệ thống cập nhật lại thứ tự trong queue.
+
+Smart Queue
+Yêu cầu
+
+Queue phải tự động thêm bài gợi ý khi sắp hết.
+
+Cách hoạt động
+
+Khi queue còn ít bài, hệ thống truy vấn các bài tương tự (cùng genre hoặc artist) và thêm vào cuối queue.
+10 >   
 
 những điều cần sửa :
 thanh PROGRESS
-- phần player chỉ chạy mục có id thuộc table song hoặc table podcast )
-- phần player sẽ thay đổi trên bài hát hoặc podcast được phát trong queue system . khi bấm repeat thì sẽ giữ nguyên.
 - khi bấm vào bài hát đang được phát thì nó sẽ chuyển sang trang lyric. ( lyric feature )
 thư viện
 - thư viện hiện like song , play list và followed arists
@@ -87,5 +209,4 @@ search page
 - khi bấm vào album sẽ ra album page
 - khi bấm vào nghệ sĩ sẽ ra nghệ sĩ page
 - khi bấm vào podcast sẽ ra podcast page
-top 10 
-- bấm vào bài hát thì sẽ chạy bài hát đấy luôn
+

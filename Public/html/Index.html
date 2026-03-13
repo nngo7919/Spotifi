@@ -374,69 +374,8 @@
 						<h2 class="section-title m-0">Mới phát gần đây</h2>
 						<a href="#" class="see-all">Hiện tất cả</a>
 					</div>
-					<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3">
-
-						<div class="col">
-							<div class="music-card" data-track="渇愛エチュード" data-artist="YOASOBI" data-emoji="🌙">
-								<div class="card-thumb-wrap grad-13">
-									<div class="card-emoji">🌙</div>
-									<button class="play-btn-overlay">
-										<svg viewBox="0 0 24 24">
-											<path d="M8 5v14l11-7z" />
-										</svg>
-									</button>
-								</div>
-								<div class="card-title">渇愛エチュード</div>
-								<div class="card-sub">Album · YOASOBI</div>
-							</div>
-						</div>
-
-						<div class="col">
-							<div class="music-card" data-track="キラキラポップ：ジャパン" data-artist="Japan Hits" data-emoji="🌸">
-								<div class="card-thumb-wrap grad-11">
-									<div class="card-emoji">🌸</div>
-									<button class="play-btn-overlay">
-										<svg viewBox="0 0 24 24">
-											<path d="M8 5v14l11-7z" />
-										</svg>
-									</button>
-								</div>
-								<div class="card-title">キラキラポップ：ジャパン</div>
-								<div class="card-sub">Playlist</div>
-							</div>
-						</div>
-
-						<div class="col">
-							<div class="music-card" data-track="Từng Ngày Như Mãi Mãi" data-artist="Various"
-								data-emoji="🎵">
-								<div class="card-thumb-wrap grad-14">
-									<div class="card-emoji">🎵</div>
-									<button class="play-btn-overlay">
-										<svg viewBox="0 0 24 24">
-											<path d="M8 5v14l11-7z" />
-										</svg>
-									</button>
-								</div>
-								<div class="card-title">Từng Ngày Như Mãi Mãi</div>
-								<div class="card-sub">Album</div>
-							</div>
-						</div>
-
-						<div class="col">
-							<div class="music-card" data-track="Đánh Đổi" data-artist="Various" data-emoji="🌊">
-								<div class="card-thumb-wrap grad-6">
-									<div class="card-emoji">🌊</div>
-									<button class="play-btn-overlay">
-										<svg viewBox="0 0 24 24">
-											<path d="M8 5v14l11-7z" />
-										</svg>
-									</button>
-								</div>
-								<div class="card-title">Đánh Đổi</div>
-								<div class="card-sub">Album</div>
-							</div>
-						</div>
-
+					<div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 g-3" id="recentAlbumsGrid">
+						<div class="col-12" style="color:var(--text-dim);font-size:13px;padding:12px;">Đang tải...</div>
 					</div>
 				</div>
 
@@ -584,6 +523,70 @@
 				</div>
 			</div><!-- /artistPage -->
 
+			<!-- ==============================
+         ALBUM PAGE (SPA)
+         ============================== -->
+			<div id="albumPage" style="display:none;">
+
+				<!-- Hero -->
+				<div class="album-hero" id="albumHero">
+					<div class="album-hero-bg" id="albumHeroBg"></div>
+					<div class="album-hero-overlay"></div>
+					<div class="album-hero-info">
+						<!-- Cover -->
+						<div class="album-hero-cover" id="albumCover">💿</div>
+
+						<!-- Meta -->
+						<div class="album-hero-meta">
+							<div class="album-hero-type" id="albumType">Album</div>
+							<h1 class="album-hero-title" id="albumTitle">--</h1>
+
+							<!-- Artist row -->
+							<div class="album-hero-artist" id="albumArtistRow">
+								<div class="album-artist-avatar" id="albumArtistAvatar">🎤</div>
+								<span class="album-artist-name" id="albumArtistName" data-artist-id=""></span>
+							</div>
+
+							<!-- Stats -->
+							<div class="album-hero-stats" id="albumStats"></div>
+
+							<!-- Actions -->
+							<div class="d-flex align-items-center gap-3 mt-4">
+								<button class="sw-btn-play" id="albumPlayAllBtn">
+									<svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+										<path d="M8 5v14l11-7z" />
+									</svg>
+								</button>
+								<button class="btn-follow" id="albumMoreBtn" style="opacity:0.7;">••• Thêm</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Song list -->
+				<div class="px-4 py-4">
+					<!-- Header cột -->
+					<div class="album-song-header">
+						<div class="album-col-num">#</div>
+						<div class="album-col-info">Tiêu đề</div>
+						<div class="album-col-plays">Lượt nghe</div>
+						<div class="album-col-dur">
+							<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+								<path
+									d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 14.49l-5.23-3.14V7h1.5v5.68l4.5 2.69-1.27 1.62-.5-.2z" />
+							</svg>
+						</div>
+					</div>
+					<div class="album-song-divider"></div>
+
+					<div id="albumSongList"></div>
+
+					<!-- Footer: tổng thời lượng -->
+					<div class="album-footer" id="albumFooter"></div>
+				</div>
+
+			</div><!-- /albumPage -->
+
 		</main>
 
 		<!-- ==============================
@@ -667,8 +670,8 @@
 
 				<!-- Volume -->
 				<div class="d-flex align-items-center gap-2">
-					<button class="ctrl-btn" title="Âm lượng">
-						<svg viewBox="0 0 24 24" fill="currentColor">
+					<button class="ctrl-btn" id="muteBtn" title="Tắt/Bật âm thanh">
+						<svg id="volIcon" viewBox="0 0 24 24" fill="currentColor">
 							<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05
               c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11
               5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z" />

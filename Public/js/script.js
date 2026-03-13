@@ -113,6 +113,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	function updateVolumeUI() {
 		volFill.style.width = Math.max(0, Math.min(100, volume)) + '%';
 		audioPlayer.volume = volume / 100;
+		// Kéo volume lên → tự thoát mute
+		if (volume > 0 && isMuted) isMuted = false;
+		if (typeof updateVolIcon === 'function') updateVolIcon();
 	}
 
 	/* ══════════════════════════════════════════
@@ -843,13 +846,257 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 
+	/* ══════════════════════════════════════════
+				ALBUM PAGE
+				══════════════════════════════════════════ */
+	const albumPage = document.getElementById('albumPage');
+
+	function showAlbumPage() {
+		homePage.style.display = 'none';
+		artistPage.style.display = 'none';
+		albumPage.style.display = 'block';
+		document.getElementById('mainContent').scrollTop = 0;
+	}
+	function hideAlbumPage() {
+		albumPage.style.display = 'none';
+	}
+
+	// Format tổng giây → "X giờ Y phút" hoặc "Y phút Z giây"
+	function formatTotalDuration(totalSec) {
+		const h = Math.floor(totalSec / 3600);
+		const m = Math.floor((totalSec % 3600) / 60);
+		const s = totalSec % 60;
+		if (h > 0) return `${h} giờ ${m} phút`;
+		if (m > 0) return `${m} phút ${s} giây`;
+		return `${s} giây`;
+	}
+
+	async function openAlbumPage(albumId) {
+		showAlbumPage();
+
+		// Reset
+		document.getElementById('albumTitle').textContent = 'Đang tải...';
+		document.getElementById('albumSongList').innerHTML = '';
+		document.getElementById('albumFooter').innerHTML = '';
+		document.getElementById('albumStats').innerHTML = '';
+
+		try {
+			const res = await fetch(`${API}/albums/${albumId}`, {
+				headers: { 'Authorization': `Bearer ${token}` }
+			});
+			const album = await res.json();
+			if (!album || !album.id) throw new Error('Không tìm thấy album');
+
+			// ── Hero ──
+			const cover = document.getElementById('albumCover');
+			const heroBg = document.getElementById('albumHeroBg');
+
+			if (album.cover_url) {
+				cover.innerHTML = `<img src="${album.cover_url}" alt="${album.title}">`;
+				heroBg.style.backgroundImage = `url(${album.cover_url})`;
+			} else {
+				cover.textContent = '💿';
+				heroBg.style.background = 'linear-gradient(135deg,#1a1a2e,#0a0a0a)';
+			}
+
+			document.getElementById('albumType').textContent =
+				album.type === 'single' ? 'Single' : album.type === 'ep' ? 'EP' : 'Album';
+			document.getElementById('albumTitle').textContent = album.title;
+
+			// Artist
+			const artistNameEl = document.getElementById('albumArtistName');
+			const artistAvaEl = document.getElementById('albumArtistAvatar');
+			artistNameEl.textContent = album.artist_name || '';
+			artistNameEl.dataset.artistId = album.artist_id || '';
+			if (album.artist_avatar) {
+				artistAvaEl.innerHTML = `<img src="${album.artist_avatar}" alt="">`;
+			} else {
+				artistAvaEl.textContent = '🎤';
+			}
+
+			// Stats: năm · số bài
+			const year = album.release_date ? album.release_date.substring(0, 4) : '';
+			const songCount = (album.songs || []).length;
+			document.getElementById('albumStats').innerHTML =
+				`<span>${year}</span><span>${songCount} bài hát</span>`;
+
+			// ── Song list ──
+			const songs = album.songs || [];
+			const totalSec = songs.reduce((sum, s) => sum + (s.duration || 0), 0);
+
+			document.getElementById('albumSongList').innerHTML = songs.map((s, i) => {
+				const isPlaying = Queue.current && Queue.current.id == s.id;
+				return `
+				<div class="album-song-row ${isPlaying ? 'playing' : ''}" data-idx="${i}">
+					<div class="album-song-num">
+						${isPlaying
+						? `<svg viewBox="0 0 24 24" fill="#1db954" width="14" height="14"><path d="M8 5v14l11-7z"/></svg>`
+						: i + 1}
+					</div>
+					<div>
+						<div class="album-song-title">${s.title}</div>
+						<div class="album-song-artist">${album.artist_name || ''}</div>
+					</div>
+					<div class="album-song-plays">${formatPlays(s.plays_count)}</div>
+					<div class="album-song-dur">${secondsToMMSS(s.duration)}</div>
+				</div>`;
+			}).join('');
+
+			// Footer
+			document.getElementById('albumFooter').innerHTML =
+				`<strong>${year}</strong> · ${songCount} bài hát, <strong>${formatTotalDuration(totalSec)}</strong>`;
+
+			// ── Play All ──
+			document.getElementById('albumPlayAllBtn').onclick = () => {
+				const list = songs.map(s => ({
+					id: s.id,
+					title: s.title,
+					artist: album.artist_name || '',
+					emoji: '🎵',
+				}));
+				window.playCollection(list, 0);
+			};
+
+			// ── Click từng bài ──
+			document.querySelectorAll('#albumSongList .album-song-row').forEach(row => {
+				row.addEventListener('click', () => {
+					const idx = parseInt(row.dataset.idx);
+					const list = songs.map(s => ({
+						id: s.id,
+						title: s.title,
+						artist: album.artist_name || '',
+						emoji: '🎵',
+					}));
+					window.playCollection(list, idx);
+				});
+			});
+
+			// ── Click tên artist → mở artist page ──
+			document.getElementById('albumArtistRow').addEventListener('click', () => {
+				if (album.artist_id) openArtistPage(album.artist_id);
+			});
+
+		} catch (err) {
+			document.getElementById('albumTitle').textContent = 'Lỗi tải album';
+			console.error('openAlbumPage error:', err);
+		}
+	}
+
+	// Mở album page khi click vào card album (data-album-id)
+	document.addEventListener('click', e => {
+		const albumLink = e.target.closest('[data-album-id]');
+		if (albumLink) {
+			e.preventDefault();
+			openAlbumPage(albumLink.dataset.albumId);
+		}
+	});
+
+	// Nút Back từ album page → quay về trang trước
+	// (dùng lại btn-nav đã có, thêm xử lý albumPage)
+	document.querySelectorAll('.btn-nav').forEach((btn, i) => {
+		if (i === 0) {
+			btn.addEventListener('click', () => {
+				if (albumPage.style.display !== 'none') {
+					hideAlbumPage();
+					// Nếu từ artist page → quay lại artist page
+					// Nếu từ home → quay lại home
+					if (artistPage.style.display === 'none' && homePage.style.display === 'none') {
+						showHomePage();
+					}
+				}
+			});
+		}
+	});
+
+	/* ── MUTE BUTTON ── */
+	const VOL_ICONS = {
+		high: `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>`,
+		low: `<path d="M18.5 12c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM5 9v6h4l5 5V4L9 9H5z"/>`,
+		mute: `<path d="M16.5 12c0-1.77-1.02-3.29-2.5-4.03v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51C20.63 14.91 21 13.5 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3L3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06c1.38-.31 2.63-.95 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4L9.91 6.09 12 8.18V4z"/>`,
+	};
+
+	const muteBtn = document.getElementById('muteBtn');
+	const volIcon = document.getElementById('volIcon');
+	let isMuted = false;
+	let volumeBeforeMute = 70;
+
+	function updateVolIcon() {
+		if (isMuted || volume === 0) {
+			volIcon.innerHTML = VOL_ICONS.mute;
+			muteBtn.style.color = 'var(--text-dim)';
+		} else if (volume < 50) {
+			volIcon.innerHTML = VOL_ICONS.low;
+			muteBtn.style.color = '';
+		} else {
+			volIcon.innerHTML = VOL_ICONS.high;
+			muteBtn.style.color = '';
+		}
+	}
+
+	muteBtn.addEventListener('click', () => {
+		isMuted = !isMuted;
+		if (isMuted) {
+			volumeBeforeMute = volume;
+			audioPlayer.volume = 0;
+			volFill.style.width = '0%';
+		} else {
+			volume = volumeBeforeMute || 70;
+			audioPlayer.volume = volume / 100;
+			volFill.style.width = volume + '%';
+		}
+		updateVolIcon();
+	});
+
 	/* ── Init ── */
 	updateProgressUI();
 	updateVolumeUI();
+	updateVolIcon();
 
 	// Load top 10 + danh sách nghệ sĩ lên trang chủ
 	loadTop10();
 	loadHomeArtists();
+	loadRecentAlbums();
+
+	async function loadRecentAlbums() {
+		const grid = document.getElementById('recentAlbumsGrid');
+		try {
+			const res = await fetch(`${API}/albums`);
+			const albums = await res.json();
+
+			if (!Array.isArray(albums) || !albums.length) {
+				grid.innerHTML = '<div class="col-12" style="color:var(--text-dim);font-size:13px;">Chưa có album.</div>';
+				return;
+			}
+
+			const gradients = ['grad-1', 'grad-3', 'grad-5', 'grad-6', 'grad-7', 'grad-8', 'grad-9', 'grad-11', 'grad-13', 'grad-14'];
+
+			grid.innerHTML = albums.slice(0, 8).map((al, i) => {
+				const grad = gradients[i % gradients.length];
+				const year = al.release_date ? al.release_date.substring(0, 4) : '';
+				const type = al.type === 'single' ? 'Single' : al.type === 'ep' ? 'EP' : 'Album';
+
+				return `
+				<div class="col">
+					<div class="music-card" data-album-id="${al.id}">
+						<div class="card-thumb-wrap ${grad}">
+							${al.cover_url
+						? `<img src="${al.cover_url}" alt="${al.title}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;">`
+						: `<div class="card-emoji">💿</div>`}
+							<button class="play-btn-overlay">
+								<svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+							</button>
+						</div>
+						<div class="card-title">${al.title}</div>
+						<div class="card-sub">${type} · ${al.artist_name}${year ? ' · ' + year : ''}</div>
+					</div>
+				</div>`;
+			}).join('');
+
+		} catch (err) {
+			console.error('loadRecentAlbums error:', err);
+			grid.innerHTML = '<div class="col-12" style="color:var(--text-dim);font-size:13px;">Không thể tải album.</div>';
+		}
+	}
 
 	async function loadTop10() {
 		const list = document.getElementById('top10List');

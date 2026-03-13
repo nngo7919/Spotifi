@@ -1,8 +1,20 @@
-
+// =============================================
+//  routes/albums.js
+// =============================================
 
 const express = require('express');
 const router = express.Router();
 const db = require('../db');
+
+// GET /api/albums — lấy tất cả album
+router.get('/', async (req, res) => {
+	try {
+		const albums = await db.getAllAlbums();
+		res.json(albums);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
 
 // GET /api/albums/:id — lấy album + danh sách bài hát
 router.get('/:id', async (req, res) => {
