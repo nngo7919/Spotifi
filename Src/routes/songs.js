@@ -54,6 +54,22 @@ router.get('/search', async (req, res) => {
 	}
 });
 
+// GET /api/songs/:id/lyrics — public
+router.get('/:id/lyrics', async (req, res) => {
+	try {
+		const song = await db.getSongById(req.params.id);
+		if (!song) return res.status(404).json({ error: 'Không tìm thấy bài hát' });
+		res.json({
+			id: song.id,
+			title: song.title,
+			artist: song.artist_name,
+			lyrics: song.lyrics || null,
+		});
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
 // GET /api/songs/:id — public
 router.get('/:id', async (req, res) => {
 	try {

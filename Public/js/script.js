@@ -1008,6 +1008,248 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	});
 
+	/* ══════════════════════════════════════════
+				LYRICS PAGE  (LRC sync)
+				══════════════════════════════════════════ */
+	const lyricsPage = document.getElementById('lyricsPage');
+	const lyricsBtn = document.getElementById('lyricsBtn');
+	let lyricsActive = false;
+	let lyricsCurrentSongId = null;
+	let lrcLines = [];   // [{time, text}]
+	let lyricsIsLRC = false;
+	let lastHighlightIdx = -1;
+
+	// ── Parse LRC format ──
+	// [mm:ss.xx] hoặc [mm:ss]
+	function parseLRC(raw) {
+		const lines = raw.split('\n');
+		const result = [];
+		const re = /\[(\d{2}):(\d{2})(?:[.:](\d+))?\](.*)/;
+		for (const line of lines) {
+			const m = line.match(re);
+			if (m) {
+				const min = parseInt(m[1]);
+				const sec = parseInt(m[2]);
+				const ms = m[3] ? parseInt(m[3].padEnd(3, '0').slice(0, 3)) : 0;
+				const time = min * 60 + sec + ms / 1000;
+				const text = m[4].trim();
+				result.push({ time, text });
+			}
+		}
+		return result.sort((a, b) => a.time - b.time);
+	}
+
+	// ── Render LRC lines ──
+	function renderLRC(lines) {
+		const textEl = document.getElementById('lyricsText');
+		textEl.innerHTML = lines.map((l, i) =>
+			`<div class="lrc-line" data-idx="${i}">${l.text || '　'}</div>`
+		).join('');
+	}
+
+	// ── Render plain text lyrics ──
+	function renderPlainLyrics(text) {
+		const textEl = document.getElementById('lyricsText');
+		const escaped = text
+			.replace(/&/g, '&amp;')
+			.replace(/</g, '&lt;')
+			.replace(/>/g, '&gt;');
+		textEl.innerHTML = `<div class="plain-lyrics">${escaped}</div>`;
+	}
+
+	// ── Highlight dòng hiện tại ──
+	function highlightLRC(currentTime) {
+		if (!lyricsIsLRC || !lrcLines.length) return;
+
+		let idx = 0;
+		for (let i = 0; i < lrcLines.length; i++) {
+			if (currentTime >= lrcLines[i].time) idx = i;
+			else break;
+		}
+
+		if (idx === lastHighlightIdx) return;
+		lastHighlightIdx = idx;
+
+		const textEl = document.getElementById('lyricsText');
+		textEl.querySelectorAll('.lrc-line').forEach((el, i) => {
+			el.classList.toggle('lrc-active', i === idx);
+			el.classList.toggle('lrc-past', i < idx);
+			el.classList.toggle('lrc-upcoming', i > idx);
+		});
+
+		// Auto scroll dòng active vào giữa panel
+		const activeEl = textEl.querySelector('.lrc-active');
+		if (activeEl) {
+			const parent = document.getElementById('lyricsRight') || textEl.closest('.lyrics-right');
+			if (parent) {
+				const offset = activeEl.offsetTop - parent.clientHeight / 2 + activeEl.clientHeight / 2;
+				parent.scrollTo({ top: offset, behavior: 'smooth' });
+			}
+		}
+	}
+
+	function showLyricsPage() {
+		homePage.style.display = 'none';
+		artistPage.style.display = 'none';
+		albumPage.style.display = 'none';
+		lyricsPage.style.display = 'block';
+		lyricsActive = true;
+		lyricsBtn.style.color = 'var(--accent)';
+		document.getElementById('mainContent').scrollTop = 0;
+	}
+	function hideLyricsPage() {
+		lyricsPage.style.display = 'none';
+		lyricsActive = false;
+		lastHighlightIdx = -1;
+		lyricsBtn.style.color = '';
+	}
+
+	function syncLyricsMeta() {
+		const thumbEl = document.getElementById('nowThumb');
+		const coverEl = document.getElementById('lyricsCover');
+		const img = thumbEl.querySelector('img');
+		if (img) {
+			coverEl.innerHTML = `<img src="${img.src}" alt="">`;
+		} else {
+			coverEl.textContent = thumbEl.textContent || '🎵';
+		}
+		document.getElementById('lyricsSongTitle').textContent = document.getElementById('trackName').textContent || '--';
+		document.getElementById('lyricsSongArtist').textContent = document.getElementById('trackArtist').textContent || '--';
+	}
+
+	async function loadLyrics(songId) {
+		if (!songId) return;
+		const textEl = document.getElementById('lyricsText');
+		textEl.innerHTML = '<div class="lyrics-loading">Đang tải lời bài hát...</div>';
+		lrcLines = [];
+		lyricsIsLRC = false;
+		lastHighlightIdx = -1;
+
+		try {
+			const res = await fetch(`${API}/songs/${songId}/lyrics`);
+			const data = await res.json();
+
+			if (!data.lyrics) {
+				textEl.innerHTML = '<div class="lyrics-empty">Chưa có lời bài hát cho bài này.</div>';
+				return;
+			}
+
+			// Detect LRC: có ít nhất 1 dòng [mm:ss...]
+			const isLRC = /\[\d{2}:\d{2}/.test(data.lyrics);
+
+			if (isLRC) {
+				lrcLines = parseLRC(data.lyrics);
+				lyricsIsLRC = true;
+				renderLRC(lrcLines);
+				// Highlight ngay tại vị trí hiện tại
+				highlightLRC(audioPlayer.currentTime || 0);
+			} else {
+				renderPlainLyrics(data.lyrics);
+			}
+
+		} catch (err) {
+			textEl.innerHTML = '<div class="lyrics-empty">Không thể tải lời bài hát.</div>';
+		}
+	}
+
+	// ── Mở / đóng lyrics page ──
+	lyricsBtn.addEventListener('click', () => {
+		if (lyricsActive) {
+			hideLyricsPage();
+			showHomePage();
+			return;
+		}
+		showLyricsPage();
+		syncLyricsMeta();
+		const songId = Queue.current?.id;
+		if (songId && songId !== lyricsCurrentSongId) {
+			lyricsCurrentSongId = songId;
+			loadLyrics(songId);
+		}
+	});
+
+	// ── Mini progress bar ──
+	const lyricsProgressTrack = document.getElementById('lyricsProgressTrack');
+	lyricsProgressTrack.addEventListener('click', e => {
+		const rect = lyricsProgressTrack.getBoundingClientRect();
+		const ratio = (e.clientX - rect.left) / rect.width;
+		audioPlayer.currentTime = ratio * (audioPlayer.duration || 0);
+	});
+
+	// ── Mini controls ──
+	document.getElementById('lyricsPrevBtn').addEventListener('click', () => prevTrack());
+	document.getElementById('lyricsNextBtn').addEventListener('click', () => nextTrack());
+	document.getElementById('lyricsPlayBtn').addEventListener('click', () => togglePlay());
+
+	// ── Sync progress + LRC highlight theo timeupdate ──
+	audioPlayer.addEventListener('timeupdate', () => {
+		if (!lyricsActive) return;
+		const cur = audioPlayer.currentTime || 0;
+		const dur = audioPlayer.duration || 0;
+		const pct = dur > 0 ? (cur / dur * 100) : 0;
+		document.getElementById('lyricsProgressFill').style.width = pct + '%';
+		document.getElementById('lyricsTimeNow').textContent = secondsToMMSS(Math.floor(cur));
+		document.getElementById('lyricsTimeEnd').textContent = secondsToMMSS(Math.floor(dur));
+		// LRC sync
+		if (lyricsIsLRC) highlightLRC(cur);
+	});
+
+	// ── Sync play/pause icon ──
+	audioPlayer.addEventListener('play', () => {
+		if (!lyricsActive) return;
+		document.getElementById('lyricsPlayIcon').innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+	});
+	audioPlayer.addEventListener('pause', () => {
+		if (!lyricsActive) return;
+		document.getElementById('lyricsPlayIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+	});
+
+	/* ══════════════════════════════════════════
+				HELPER: togglePlay / prevTrack / nextTrack
+				(dùng cho lyrics page controls)
+				══════════════════════════════════════════ */
+	function togglePlay() {
+		if (!Queue.current) return;
+		playing = !playing;
+		if (playing) {
+			audioPlayer.play().catch(() => { });
+			playIcon.innerHTML = '<path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/>';
+			bars.style.opacity = '1';
+		} else {
+			audioPlayer.pause();
+			playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+			bars.style.opacity = '0.3';
+		}
+	}
+
+	function nextTrack() {
+		if (Queue.hasNext || Queue.shuffle) {
+			Queue.next();
+			loadAndPlay(Queue.current);
+			if (lyricsActive) {
+				syncLyricsMeta();
+				lyricsCurrentSongId = Queue.current?.id;
+				loadLyrics(lyricsCurrentSongId);
+			}
+		}
+	}
+
+	function prevTrack() {
+		if (audioPlayer.currentTime > 3) {
+			audioPlayer.currentTime = 0;
+			return;
+		}
+		if (Queue.hasPrev) {
+			Queue.prev();
+			loadAndPlay(Queue.current);
+			if (lyricsActive) {
+				syncLyricsMeta();
+				lyricsCurrentSongId = Queue.current?.id;
+				loadLyrics(lyricsCurrentSongId);
+			}
+		}
+	}
+
 	/* ── MUTE BUTTON ── */
 	const VOL_ICONS = {
 		high: `<path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3c0-1.77-1.02-3.29-2.5-4.03v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/>`,

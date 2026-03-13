@@ -7,6 +7,18 @@ const router = express.Router();
 const db = require('../db');
 const { verifyToken } = require('../middleware/auth');
 
+// GET /api/artists — lấy tất cả nghệ sĩ (public)
+router.get('/', async (req, res) => {
+	try {
+		const artists = await db.query(
+			'SELECT id, name, avatar_url, verified FROM artists ORDER BY name'
+		);
+		res.json(artists);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
 // GET /api/artists/:id — public
 router.get('/:id', async (req, res) => {
 	try {

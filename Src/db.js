@@ -52,6 +52,7 @@ async function getSongById(songId) {
     SELECT
       s.id, s.title, s.duration, s.file_url,
       s.cover_url, s.plays_count, s.is_explicit,
+      s.lyrics,
       a.id   AS artist_id,
       a.name AS artist_name,
       al.id        AS album_id,

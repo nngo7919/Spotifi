@@ -1349,3 +1349,218 @@ ul { list-style: none; padding: 0; margin: 0; }
   border-top: 1px solid rgba(255,255,255,0.07);
 }
 .album-footer strong { color: var(--text); }
+
+/* ========================
+   LYRICS PAGE
+   ======================== */
+#lyricsPage {
+  min-height: 100%;
+  background: linear-gradient(180deg, #1a1a2e 0%, #0a0a0a 100%);
+}
+
+.lyrics-wrap {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 0;
+  min-height: calc(100vh - 80px);
+}
+
+/* ── Left panel ── */
+.lyrics-left {
+  position: sticky;
+  top: 0;
+  height: calc(100vh - 80px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 32px 24px;
+  border-right: 1px solid rgba(255,255,255,0.07);
+  background: rgba(0,0,0,0.3);
+}
+
+.lyrics-cover {
+  width: 200px;
+  height: 200px;
+  border-radius: 12px;
+  background: var(--card-hover);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 72px;
+  overflow: hidden;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.6);
+  flex-shrink: 0;
+}
+.lyrics-cover img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: 12px;
+}
+
+.lyrics-song-title {
+  font-size: 18px;
+  font-weight: 800;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+}
+
+.lyrics-song-artist {
+  font-size: 13px;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+/* mini progress */
+.lyrics-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+}
+.lyrics-time {
+  font-size: 11px;
+  color: var(--text-dim);
+  flex-shrink: 0;
+  min-width: 32px;
+}
+.lyrics-time:last-child { text-align: right; }
+
+.lyrics-progress-track {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 2px;
+  cursor: pointer;
+  position: relative;
+}
+.lyrics-progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 2px;
+  width: 0%;
+  pointer-events: none;
+}
+.lyrics-progress-track:hover .lyrics-progress-fill {
+  background: #fff;
+}
+
+/* mini controls */
+.lyrics-controls {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+.lyrics-play-btn {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--accent);
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: transform 0.1s, background 0.2s;
+  color: #000;
+}
+.lyrics-play-btn:hover {
+  transform: scale(1.06);
+  background: #1ed760;
+}
+
+/* ── Right panel ── */
+.lyrics-right {
+  padding: 48px 56px;
+  overflow-y: auto;
+}
+
+.lyrics-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  margin-bottom: 32px;
+}
+
+.lyrics-text {
+  font-size: 28px;
+  font-weight: 700;
+  line-height: 1.8;
+  white-space: pre-wrap;
+  color: rgba(255,255,255,0.85);
+}
+
+.lyrics-loading,
+.lyrics-empty {
+  font-size: 16px;
+  color: var(--text-dim);
+  font-weight: 400;
+}
+
+/* Responsive */
+@media (max-width: 700px) {
+  .lyrics-wrap {
+    grid-template-columns: 1fr;
+  }
+  .lyrics-left {
+    position: relative;
+    height: auto;
+    border-right: none;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+    padding: 24px 16px;
+  }
+  .lyrics-cover { width: 140px; height: 140px; }
+  .lyrics-right { padding: 24px 20px; }
+  .lyrics-text  { font-size: 20px; }
+}
+
+/* ── LRC sync lines ── */
+.lrc-line {
+  font-size: 26px;
+  font-weight: 700;
+  line-height: 1.6;
+  padding: 6px 0;
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-radius: 8px;
+}
+.lrc-line:hover { background: rgba(255,255,255,0.05); padding-left: 8px; }
+
+/* Dòng đang hát */
+.lrc-active {
+  font-size: 32px !important;
+  color: #fff !important;
+  font-weight: 900 !important;
+  text-shadow: 0 0 30px rgba(29,185,84,0.5);
+}
+
+/* Dòng đã hát qua */
+.lrc-past {
+  color: rgba(255,255,255,0.3) !important;
+  font-size: 22px !important;
+  font-weight: 600 !important;
+}
+
+/* Dòng chưa hát */
+.lrc-upcoming {
+  color: rgba(255,255,255,0.55) !important;
+}
+
+/* Plain lyrics */
+.plain-lyrics {
+  font-size: 22px;
+  line-height: 2;
+  white-space: pre-wrap;
+  color: rgba(255,255,255,0.8);
+}
+
+/* Scroll smooth cho lyrics-right */
+.lyrics-right {
+  scroll-behavior: smooth;
+}

@@ -66,9 +66,9 @@ router.post('/login', async (req, res) => {
 		if (!match)
 			return res.status(401).json({ error: 'Mật khẩu không đúng' });
 
-		// Tạo JWT token
+		// Tạo JWT token — bao gồm role
 		const token = jwt.sign(
-			{ userId: user.id, username: user.username },
+			{ userId: user.id, username: user.username, role: user.role || 'user' },
 			JWT_SECRET,
 			{ expiresIn: '7d' }
 		);
@@ -81,6 +81,7 @@ router.post('/login', async (req, res) => {
 				username: user.username,
 				email: user.email,
 				avatar: user.avatar_url,
+				role: user.role || 'user',
 			}
 		});
 	} catch (err) {

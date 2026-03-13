@@ -1,14 +1,6 @@
 project sẽ có 
 
-✅ 4. Album Page
 
-Cover
-
-Ngày phát hành
-
-Danh sách bài
-
-Tổng thời lượng
 
 ✅ 5. Playlist System
 
@@ -195,7 +187,8 @@ Khi queue còn ít bài, hệ thống truy vấn các bài tương tự (cùng g
 
 những điều cần sửa :
 thanh PROGRESS
-- khi bấm vào bài hát đang được phát thì nó sẽ chuyển sang trang lyric. ( lyric feature )
+- sẽ có nút hình mic và khi bấm vào thì nó sẽ chuyển sang trang lyric của bài hát đang phát. ( lyric feature )
+- bấm vào tên bài hát thì sẽ hiện ra trang album kể cả 
 thư viện
 - thư viện hiện like song , play list và followed arists
 - khi bấm vào album thì ra album page , khi bấm vào arists thì ra arists page , bấm vào playlist thì sẽ ra playlist page
