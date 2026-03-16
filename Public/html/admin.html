@@ -5,540 +5,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>SoundWave Admin</title>
-	<style>
-		*,
-		*::before,
-		*::after {
-			box-sizing: border-box;
-			margin: 0;
-			padding: 0;
-		}
-
-		:root {
-			--bg: #0a0a0f;
-			--surface: #13131a;
-			--border: rgba(255, 255, 255, 0.08);
-			--accent: #1db954;
-			--accent2: #1565c0;
-			--text: #ffffff;
-			--text-dim: rgba(255, 255, 255, 0.45);
-			--danger: #e53935;
-			--radius: 12px;
-		}
-
-		body {
-			background: var(--bg);
-			color: var(--text);
-			font-family: 'Segoe UI', system-ui, sans-serif;
-			min-height: 100vh;
-			display: flex;
-		}
-
-		/* ── Sidebar ── */
-		.sidebar {
-			width: 220px;
-			background: var(--surface);
-			border-right: 1px solid var(--border);
-			display: flex;
-			flex-direction: column;
-			padding: 24px 16px;
-			gap: 8px;
-			position: sticky;
-			top: 0;
-			height: 100vh;
-		}
-
-		.sidebar-logo {
-			display: flex;
-			align-items: center;
-			gap: 10px;
-			padding: 8px 12px 24px;
-			font-size: 18px;
-			font-weight: 900;
-			letter-spacing: -0.5px;
-		}
-
-		.sidebar-logo span {
-			width: 32px;
-			height: 32px;
-			background: var(--accent);
-			border-radius: 50%;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-size: 14px;
-		}
-
-		.nav-item {
-			display: flex;
-			align-items: center;
-			gap: 12px;
-			padding: 10px 12px;
-			border-radius: 8px;
-			cursor: pointer;
-			font-size: 14px;
-			font-weight: 600;
-			color: var(--text-dim);
-			transition: all 0.15s;
-			border: none;
-			background: none;
-			width: 100%;
-			text-align: left;
-		}
-
-		.nav-item:hover {
-			background: rgba(255, 255, 255, 0.05);
-			color: var(--text);
-		}
-
-		.nav-item.active {
-			background: rgba(29, 185, 84, 0.12);
-			color: var(--accent);
-		}
-
-		.nav-item svg {
-			flex-shrink: 0;
-		}
-
-		/* ── Main ── */
-		.main {
-			flex: 1;
-			overflow-y: auto;
-			padding: 40px 48px;
-			max-width: 900px;
-		}
-
-		.page {
-			display: none;
-		}
-
-		.page.active {
-			display: block;
-		}
-
-		h1 {
-			font-size: 28px;
-			font-weight: 900;
-			letter-spacing: -0.5px;
-			margin-bottom: 8px;
-		}
-
-		.page-desc {
-			font-size: 14px;
-			color: var(--text-dim);
-			margin-bottom: 36px;
-		}
-
-		/* ── Form ── */
-		.form-grid {
-			display: grid;
-			grid-template-columns: 1fr 1fr;
-			gap: 20px;
-		}
-
-		.form-group {
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
-		}
-
-		.form-group.full {
-			grid-column: 1 / -1;
-		}
-
-		label {
-			font-size: 12px;
-			font-weight: 700;
-			text-transform: uppercase;
-			letter-spacing: 1px;
-			color: var(--text-dim);
-		}
-
-		label span.req {
-			color: var(--accent);
-			margin-left: 2px;
-		}
-
-		input,
-		select,
-		textarea {
-			background: var(--surface);
-			border: 1px solid var(--border);
-			border-radius: 8px;
-			padding: 12px 14px;
-			font-size: 14px;
-			color: var(--text);
-			font-family: inherit;
-			transition: border 0.15s;
-			outline: none;
-			width: 100%;
-		}
-
-		input:focus,
-		select:focus,
-		textarea:focus {
-			border-color: var(--accent);
-		}
-
-		select option {
-			background: #1a1a2e;
-		}
-
-		textarea {
-			resize: vertical;
-			min-height: 120px;
-		}
-
-		/* File upload drop zone */
-		.drop-zone {
-			border: 2px dashed var(--border);
-			border-radius: var(--radius);
-			padding: 28px 20px;
-			text-align: center;
-			cursor: pointer;
-			transition: all 0.2s;
-			position: relative;
-		}
-
-		.drop-zone:hover,
-		.drop-zone.drag-over {
-			border-color: var(--accent);
-			background: rgba(29, 185, 84, 0.04);
-		}
-
-		.drop-zone input[type="file"] {
-			position: absolute;
-			inset: 0;
-			opacity: 0;
-			cursor: pointer;
-			width: 100%;
-			height: 100%;
-		}
-
-		.drop-zone-icon {
-			font-size: 28px;
-			margin-bottom: 8px;
-		}
-
-		.drop-zone-text {
-			font-size: 13px;
-			color: var(--text-dim);
-		}
-
-		.drop-zone-text strong {
-			color: var(--accent);
-		}
-
-		.drop-zone-file {
-			font-size: 13px;
-			color: var(--accent);
-			margin-top: 6px;
-			font-weight: 600;
-		}
-
-		/* Buttons */
-		.btn-row {
-			display: flex;
-			gap: 12px;
-			margin-top: 32px;
-			align-items: center;
-		}
-
-		.btn {
-			padding: 13px 28px;
-			border-radius: 50px;
-			font-size: 14px;
-			font-weight: 700;
-			border: none;
-			cursor: pointer;
-			transition: all 0.15s;
-			display: flex;
-			align-items: center;
-			gap: 8px;
-		}
-
-		.btn-primary {
-			background: var(--accent);
-			color: #000;
-		}
-
-		.btn-primary:hover {
-			background: #1ed760;
-			transform: scale(1.02);
-		}
-
-		.btn-primary:disabled {
-			opacity: 0.5;
-			cursor: not-allowed;
-			transform: none;
-		}
-
-		.btn-secondary {
-			background: transparent;
-			color: var(--text-dim);
-			border: 1px solid var(--border);
-		}
-
-		.btn-secondary:hover {
-			color: var(--text);
-			border-color: rgba(255, 255, 255, 0.2);
-		}
-
-		/* Divider */
-		.divider {
-			height: 1px;
-			background: var(--border);
-			margin: 36px 0;
-		}
-
-		/* Toast */
-		#toast {
-			position: fixed;
-			bottom: 32px;
-			right: 32px;
-			background: var(--surface);
-			border: 1px solid var(--border);
-			border-radius: var(--radius);
-			padding: 14px 20px;
-			font-size: 14px;
-			font-weight: 600;
-			display: none;
-			align-items: center;
-			gap: 10px;
-			z-index: 9999;
-			box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
-			animation: slideUp 0.25s ease;
-		}
-
-		#toast.show {
-			display: flex;
-		}
-
-		#toast.success {
-			border-color: var(--accent);
-			color: var(--accent);
-		}
-
-		#toast.error {
-			border-color: var(--danger);
-			color: var(--danger);
-		}
-
-		@keyframes slideUp {
-			from {
-				transform: translateY(12px);
-				opacity: 0;
-			}
-
-			to {
-				transform: translateY(0);
-				opacity: 1;
-			}
-		}
-
-		/* Progress bar */
-		.upload-progress {
-			display: none;
-			margin-top: 16px;
-		}
-
-		.upload-progress.show {
-			display: block;
-		}
-
-		.progress-bar-track {
-			height: 4px;
-			background: var(--border);
-			border-radius: 2px;
-			overflow: hidden;
-		}
-
-		.progress-bar-fill {
-			height: 100%;
-			background: var(--accent);
-			width: 0%;
-			transition: width 0.3s;
-			border-radius: 2px;
-		}
-
-		.progress-label {
-			font-size: 12px;
-			color: var(--text-dim);
-			margin-bottom: 6px;
-		}
-
-		/* Artist select loading */
-		.hint {
-			font-size: 12px;
-			color: var(--text-dim);
-			margin-top: 4px;
-		}
-
-		/* Recent uploads list */
-		.upload-list {
-			margin-top: 40px;
-		}
-
-		.upload-list h2 {
-			font-size: 16px;
-			font-weight: 700;
-			margin-bottom: 16px;
-		}
-
-		.upload-item {
-			display: flex;
-			align-items: center;
-			gap: 14px;
-			padding: 12px 16px;
-			background: var(--surface);
-			border: 1px solid var(--border);
-			border-radius: 10px;
-			margin-bottom: 10px;
-		}
-
-		.upload-item-icon {
-			width: 40px;
-			height: 40px;
-			border-radius: 8px;
-			background: rgba(29, 185, 84, 0.1);
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-size: 18px;
-			flex-shrink: 0;
-		}
-
-		.upload-item-info {
-			flex: 1;
-			min-width: 0;
-		}
-
-		.upload-item-title {
-			font-size: 14px;
-			font-weight: 700;
-		}
-
-		.upload-item-sub {
-			font-size: 12px;
-			color: var(--text-dim);
-		}
-
-		.upload-item-badge {
-			font-size: 11px;
-			font-weight: 700;
-			padding: 3px 10px;
-			border-radius: 50px;
-			background: rgba(29, 185, 84, 0.12);
-			color: var(--accent);
-		}
-
-		/* ── Artist autocomplete ── */
-		.artist-input-wrap {
-			position: relative;
-		}
-
-		.artist-input-wrap input[type="text"] {
-			width: 100%;
-		}
-
-		.artist-dropdown {
-			position: absolute;
-			top: calc(100% + 4px);
-			left: 0;
-			right: 0;
-			background: #1e1e2a;
-			border: 1px solid rgba(255, 255, 255, 0.12);
-			border-radius: 10px;
-			z-index: 100;
-			overflow: hidden;
-			display: none;
-			box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
-		}
-
-		.artist-dropdown.open {
-			display: block;
-		}
-
-		.artist-option {
-			display: flex;
-			align-items: center;
-			gap: 12px;
-			padding: 10px 14px;
-			cursor: pointer;
-			font-size: 14px;
-			transition: background 0.1s;
-		}
-
-		.artist-option:hover {
-			background: rgba(255, 255, 255, 0.07);
-		}
-
-		.artist-option-avatar {
-			width: 32px;
-			height: 32px;
-			border-radius: 50%;
-			background: rgba(29, 185, 84, 0.15);
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-size: 14px;
-			flex-shrink: 0;
-			overflow: hidden;
-		}
-
-		.artist-option-avatar img {
-			width: 100%;
-			height: 100%;
-			object-fit: cover;
-		}
-
-		.artist-option-name {
-			font-weight: 700;
-		}
-
-		.artist-option-sub {
-			font-size: 12px;
-			color: rgba(255, 255, 255, 0.4);
-		}
-
-		.artist-option.new-artist {
-			border-top: 1px solid rgba(255, 255, 255, 0.07);
-			color: var(--accent);
-		}
-
-		.artist-option.new-artist .artist-option-avatar {
-			background: rgba(29, 185, 84, 0.2);
-		}
-
-		/* Confirmed badge */
-		.artist-confirmed {
-			display: flex;
-			align-items: center;
-			gap: 8px;
-			padding: 8px 12px;
-			background: rgba(29, 185, 84, 0.08);
-			border: 1px solid rgba(29, 185, 84, 0.2);
-			border-radius: 8px;
-			font-size: 13px;
-			font-weight: 600;
-			color: var(--accent);
-			margin-top: 6px;
-		}
-
-		.artist-confirmed button {
-			margin-left: auto;
-			background: none;
-			border: none;
-			color: rgba(255, 255, 255, 0.4);
-			cursor: pointer;
-			font-size: 16px;
-			line-height: 1;
-		}
-
-		.artist-confirmed button:hover {
-			color: #fff;
-		}
-	</style>
+	<link rel="stylesheet" href="/css/admin.css">
 </head>
 
 <body>
@@ -570,7 +37,7 @@
 		</div>
 	</div>
 
-	<!-- Sidebar -->
+	<!-- ── Sidebar ── -->
 	<nav class="sidebar">
 		<div class="sidebar-logo">
 			<span>🎵</span> Admin
@@ -591,7 +58,7 @@
 			Upload Album
 		</button>
 
-		<div style="margin-top:auto; padding-top:24px; border-top:1px solid var(--border);">
+		<div style="margin-top:auto; padding-top:24px; border-top:1px solid rgba(255,255,255,0.08);">
 			<a href="/html/index.html" style="text-decoration:none;">
 				<button class="nav-item">
 					<svg viewBox="0 0 24 24" fill="currentColor" width="18" height="18">
@@ -603,10 +70,10 @@
 		</div>
 	</nav>
 
-	<!-- Main content -->
+	<!-- ── Main ── -->
 	<main class="main">
 
-		<!-- ── UPLOAD SONG ── -->
+		<!-- UPLOAD SONG -->
 		<div class="page active" id="page-song">
 			<h1>🎵 Upload Bài hát</h1>
 			<p class="page-desc">Thêm bài hát mới vào hệ thống. File MP3 sẽ được lưu vào thư mục audio.</p>
@@ -614,22 +81,19 @@
 			<form id="songForm">
 				<div class="form-grid">
 
-					<!-- Tên bài hát -->
 					<div class="form-group">
 						<label>Tên bài hát <span class="req">*</span></label>
 						<input type="text" id="songTitle" placeholder="VD: Eleven" required>
 					</div>
 
-					<!-- Thời lượng -->
 					<div class="form-group">
 						<label>Thời lượng (giây) <span class="req">*</span></label>
 						<input type="number" id="songDuration" placeholder="VD: 187" min="1" required>
 					</div>
 
-					<!-- Nghệ sĩ -->
 					<div class="form-group">
 						<label>Nghệ sĩ <span class="req">*</span></label>
-						<div class="artist-input-wrap" id="songArtistWrap">
+						<div class="artist-input-wrap">
 							<input type="text" id="songArtistInput" placeholder="Gõ tên nghệ sĩ..." autocomplete="off">
 							<input type="hidden" id="songArtistId">
 							<div class="artist-dropdown" id="songArtistDropdown"></div>
@@ -637,25 +101,22 @@
 						<div class="hint" id="songArtistHint"></div>
 					</div>
 
-					<!-- Album -->
 					<div class="form-group">
 						<label>Album</label>
-						<div class="artist-input-wrap" id="songAlbumWrap">
-							<input type="text" id="songAlbumInput" placeholder="Gõ tên album... (để trống nếu không có)"
-								autocomplete="off">
+						<div class="artist-input-wrap">
+							<input type="text" id="songAlbumInput"
+								placeholder="Gõ tên album... (để trống = tự tạo Single)" autocomplete="off">
 							<input type="hidden" id="songAlbumId">
 							<div class="artist-dropdown" id="songAlbumDropdown"></div>
 						</div>
 						<div class="hint" id="songAlbumHint">Chọn nghệ sĩ trước để lọc album của họ</div>
 					</div>
 
-					<!-- Track number -->
 					<div class="form-group">
 						<label>Track number</label>
 						<input type="number" id="songTrack" placeholder="VD: 1" min="1" value="1">
 					</div>
 
-					<!-- Explicit -->
 					<div class="form-group">
 						<label>Nội dung</label>
 						<select id="songExplicit">
@@ -664,7 +125,6 @@
 						</select>
 					</div>
 
-					<!-- File MP3 -->
 					<div class="form-group full">
 						<label>File MP3 <span class="req">*</span></label>
 						<div class="drop-zone" id="mp3Zone">
@@ -676,17 +136,15 @@
 						</div>
 					</div>
 
-					<!-- Lyrics -->
 					<div class="form-group full">
 						<label>Lời bài hát (LRC hoặc plain text)</label>
 						<textarea id="songLyrics"
-							placeholder="[00:12.50]Dòng lời đầu tiên&#10;[00:15.20]Dòng lời thứ hai&#10;...&#10;&#10;Hoặc paste lời thường (không có timestamp)"></textarea>
+							placeholder="[00:12.50]Dòng lời đầu tiên&#10;[00:15.20]Dòng lời thứ hai&#10;&#10;Hoặc paste lời thường (không có timestamp)"></textarea>
 						<div class="hint">Hỗ trợ định dạng LRC để sync theo nhạc. Để trống nếu chưa có.</div>
 					</div>
 
 				</div>
 
-				<!-- Progress -->
 				<div class="upload-progress" id="songProgress">
 					<div class="progress-label" id="songProgressLabel">Đang upload...</div>
 					<div class="progress-bar-track">
@@ -705,11 +163,10 @@
 				</div>
 			</form>
 
-			<!-- Recent uploads -->
 			<div class="upload-list" id="recentSongs"></div>
 		</div>
 
-		<!-- ── UPLOAD ALBUM ── -->
+		<!-- UPLOAD ALBUM -->
 		<div class="page" id="page-album">
 			<h1>💿 Upload Album</h1>
 			<p class="page-desc">Tạo album mới. Sau khi tạo album, upload bài hát và chọn album tương ứng.</p>
@@ -717,16 +174,14 @@
 			<form id="albumForm">
 				<div class="form-grid">
 
-					<!-- Title -->
 					<div class="form-group full">
 						<label>Tên album <span class="req">*</span></label>
 						<input type="text" id="albumTitle" placeholder="VD: ELEVEN" required>
 					</div>
 
-					<!-- Artist autocomplete -->
 					<div class="form-group">
 						<label>Nghệ sĩ <span class="req">*</span></label>
-						<div class="artist-input-wrap" id="albumArtistWrap">
+						<div class="artist-input-wrap">
 							<input type="text" id="albumArtistInput" placeholder="Gõ tên nghệ sĩ..." autocomplete="off">
 							<input type="hidden" id="albumArtistId">
 							<div class="artist-dropdown" id="albumArtistDropdown"></div>
@@ -734,7 +189,6 @@
 						<div class="hint" id="albumArtistHint"></div>
 					</div>
 
-					<!-- Type -->
 					<div class="form-group">
 						<label>Loại</label>
 						<select id="albumType">
@@ -744,13 +198,11 @@
 						</select>
 					</div>
 
-					<!-- Release date -->
 					<div class="form-group">
 						<label>Ngày phát hành</label>
 						<input type="date" id="albumDate">
 					</div>
 
-					<!-- Cover URL -->
 					<div class="form-group">
 						<label>URL ảnh bìa</label>
 						<input type="text" id="albumCover" placeholder="https://... hoặc /images/cover.jpg">
@@ -771,555 +223,14 @@
 				</div>
 			</form>
 
-			<!-- Recent albums -->
 			<div class="upload-list" id="recentAlbums"></div>
 		</div>
 
 	</main>
 
-	<!-- Toast -->
 	<div id="toast"></div>
 
-	<script>
-		const API = 'http://localhost:3000/api';
-		let adminToken = sessionStorage.getItem('adminToken') || '';
-
-		// ── Kiểm tra token khi load ──
-		async function checkAuth() {
-			if (!adminToken) return; // hiện login gate
-			try {
-				const res = await fetch(`${API}/albums`, {
-					headers: { 'Authorization': `Bearer ${adminToken}` }
-				});
-				if (res.ok) {
-					document.getElementById('loginGate').style.display = 'none';
-					initAdmin();
-				} else {
-					adminToken = '';
-					sessionStorage.removeItem('adminToken');
-				}
-			} catch {
-				// server chưa chạy
-			}
-		}
-
-		// ── Đăng nhập admin ──
-		async function adminLogin() {
-			const email = document.getElementById('loginEmail').value.trim();
-			const password = document.getElementById('loginPassword').value;
-			const errEl = document.getElementById('loginError');
-			errEl.style.display = 'none';
-
-			if (!email || !password) {
-				errEl.textContent = 'Vui lòng nhập email và mật khẩu';
-				errEl.style.display = 'block';
-				return;
-			}
-
-			try {
-				const res = await fetch(`${API}/auth/login`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ email, password }),
-				});
-				const data = await res.json();
-
-				if (!res.ok) {
-					errEl.textContent = data.error || 'Đăng nhập thất bại';
-					errEl.style.display = 'block';
-					return;
-				}
-
-				if (data.user.role !== 'admin') {
-					errEl.textContent = 'Tài khoản này không có quyền admin';
-					errEl.style.display = 'block';
-					return;
-				}
-
-				adminToken = data.token;
-				sessionStorage.setItem('adminToken', adminToken);
-				document.getElementById('loginGate').style.display = 'none';
-				initAdmin();
-
-			} catch (err) {
-				errEl.textContent = 'Không thể kết nối server';
-				errEl.style.display = 'block';
-			}
-		}
-
-		// Enter để login
-		document.getElementById('loginPassword').addEventListener('keydown', e => {
-			if (e.key === 'Enter') adminLogin();
-		});
-
-		// ── Helper: fetch với token ──
-		function authFetch(url, options = {}) {
-			return fetch(url, {
-				...options,
-				headers: {
-					...(options.headers || {}),
-					'Authorization': `Bearer ${adminToken}`,
-				},
-			});
-		}
-
-		// ── Switch page ──
-		function switchPage(name) {
-			document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-			document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-			document.getElementById('page-' + name).classList.add('active');
-			document.getElementById('nav-' + name).classList.add('active');
-		}
-
-		// ── Toast ──
-		function showToast(msg, type = 'success') {
-			const t = document.getElementById('toast');
-			t.textContent = (type === 'success' ? '✅ ' : '❌ ') + msg;
-			t.className = 'show ' + type;
-			setTimeout(() => t.className = '', 3500);
-		}
-
-		// ── Artist autocomplete ──
-		let allArtists = [];
-
-		async function loadArtists() {
-			try {
-				const res = await fetch(`${API}/artists`);
-				allArtists = await res.json();
-			} catch (e) { console.error('Load artists:', e); }
-		}
-
-		// Khởi tạo autocomplete cho 1 cặp input
-		function initArtistAutocomplete(inputId, hiddenId, dropdownId, hintId) {
-			const input = document.getElementById(inputId);
-			const hidden = document.getElementById(hiddenId);
-			const dropdown = document.getElementById(dropdownId);
-			const hint = document.getElementById(hintId);
-			let selected = null; // { id, name, isNew }
-
-			function renderDropdown(query) {
-				const q = query.trim().toLowerCase();
-				if (!q) { dropdown.classList.remove('open'); return; }
-
-				// Lọc artist khớp
-				const matched = allArtists.filter(a => a.name.toLowerCase().includes(q));
-				const exactMatch = allArtists.find(a => a.name.toLowerCase() === q);
-
-				let html = matched.slice(0, 6).map(a => `
-        <div class="artist-option" data-id="${a.id}" data-name="${a.name}">
-          <div class="artist-option-avatar">
-            ${a.avatar_url ? `<img src="${a.avatar_url}">` : '🎤'}
-          </div>
-          <div>
-            <div class="artist-option-name">${a.name}</div>
-            <div class="artist-option-sub">ID #${a.id}</div>
-          </div>
-        </div>`).join('');
-
-				// Nút tạo mới nếu chưa có tên chính xác
-				if (!exactMatch && query.trim()) {
-					html += `
-          <div class="artist-option new-artist" data-id="NEW" data-name="${query.trim()}">
-            <div class="artist-option-avatar">➕</div>
-            <div>
-              <div class="artist-option-name">Tạo mới: "${query.trim()}"</div>
-              <div class="artist-option-sub">Thêm nghệ sĩ vào database</div>
-            </div>
-          </div>`;
-				}
-
-				dropdown.innerHTML = html;
-				dropdown.classList.toggle('open', html !== '');
-
-				// Click chọn
-				dropdown.querySelectorAll('.artist-option').forEach(opt => {
-					opt.addEventListener('click', () => {
-						const id = opt.dataset.id;
-						const name = opt.dataset.name;
-						selectArtist(id, name);
-					});
-				});
-			}
-
-			function selectArtist(id, name) {
-				selected = { id, name, isNew: id === 'NEW' };
-				input.value = name;
-				hidden.value = id === 'NEW' ? '' : id;
-				dropdown.classList.remove('open');
-
-				if (id === 'NEW') {
-					hint.innerHTML = `<span style="color:var(--accent)">✨ Sẽ tạo nghệ sĩ mới "<strong>${name}</strong>" khi upload</span>`;
-				} else {
-					hint.innerHTML = `<span style="color:rgba(255,255,255,0.5)">✅ Nghệ sĩ hiện có · ID #${id}</span>`;
-				}
-			}
-
-			function clearSelection() {
-				selected = null;
-				hidden.value = '';
-				hint.innerHTML = '';
-			}
-
-			input.addEventListener('input', () => {
-				clearSelection();
-				renderDropdown(input.value);
-			});
-
-			input.addEventListener('focus', () => {
-				if (input.value) renderDropdown(input.value);
-			});
-
-			// Đóng dropdown khi click ra ngoài
-			document.addEventListener('click', e => {
-				if (!input.closest('.artist-input-wrap').contains(e.target)) {
-					dropdown.classList.remove('open');
-				}
-			});
-
-			// Trả về hàm lấy artist (có thể tạo mới)
-			return {
-				getSelected: () => selected,
-				clear: () => {
-					input.value = '';
-					hidden.value = '';
-					hint.innerHTML = '';
-					selected = null;
-					dropdown.classList.remove('open');
-				}
-			};
-		}
-
-		// ── Album autocomplete ──
-		let allAlbums = [];
-
-		async function loadAlbums() {
-			try {
-				const res = await fetch(`${API}/albums`);
-				allAlbums = await res.json();
-			} catch (e) { }
-		}
-
-		function initAlbumAutocomplete() {
-			const input = document.getElementById('songAlbumInput');
-			const hidden = document.getElementById('songAlbumId');
-			const dropdown = document.getElementById('songAlbumDropdown');
-			const hint = document.getElementById('songAlbumHint');
-			let selected = null;
-
-			function renderDropdown(query) {
-				const q = query.trim().toLowerCase();
-
-				// Lọc theo artist đã chọn (nếu có) + query
-				const artistId = songArtistAC?.getSelected()?.id;
-				let pool = allAlbums;
-				if (artistId && artistId !== 'NEW') {
-					pool = allAlbums.filter(a => String(a.artist_id) === String(artistId));
-				}
-				const matched = q
-					? pool.filter(a => a.title.toLowerCase().includes(q))
-					: pool;
-
-				if (!matched.length && !q) {
-					dropdown.classList.remove('open');
-					return;
-				}
-
-				const html = matched.slice(0, 8).map(a => {
-					const year = a.release_date ? a.release_date.substring(0, 4) : '';
-					const type = a.type === 'single' ? 'Single' : a.type === 'ep' ? 'EP' : 'Album';
-					return `
-          <div class="artist-option" data-id="${a.id}" data-name="${a.title}">
-            <div class="artist-option-avatar">
-              ${a.cover_url ? `<img src="${a.cover_url}" style="width:100%;height:100%;object-fit:cover;border-radius:4px;">` : '💿'}
-            </div>
-            <div>
-              <div class="artist-option-name">${a.title}</div>
-              <div class="artist-option-sub">${type}${year ? ' · ' + year : ''} · ${a.artist_name}</div>
-            </div>
-          </div>`;
-				}).join('') || '<div class="artist-option" style="color:rgba(255,255,255,0.3);cursor:default;">Không tìm thấy album</div>';
-
-				dropdown.innerHTML = html;
-				dropdown.classList.add('open');
-
-				dropdown.querySelectorAll('.artist-option[data-id]').forEach(opt => {
-					opt.addEventListener('click', () => {
-						selected = { id: opt.dataset.id, name: opt.dataset.name };
-						input.value = opt.dataset.name;
-						hidden.value = opt.dataset.id;
-						hint.innerHTML = `<span style="color:rgba(255,255,255,0.5)">✅ Album ID #${opt.dataset.id}</span>`;
-						dropdown.classList.remove('open');
-					});
-				});
-			}
-
-			input.addEventListener('input', () => {
-				selected = null;
-				hidden.value = '';
-				renderDropdown(input.value);
-			});
-
-			input.addEventListener('focus', () => {
-				renderDropdown(input.value);
-			});
-
-			document.addEventListener('click', e => {
-				if (!input.closest('.artist-input-wrap').contains(e.target)) {
-					dropdown.classList.remove('open');
-				}
-			});
-
-			return {
-				getSelected: () => selected,
-				refresh: () => renderDropdown(input.value), // gọi lại khi artist thay đổi
-				clear: () => {
-					input.value = '';
-					hidden.value = '';
-					hint.innerHTML = 'Chọn nghệ sĩ trước để lọc album của họ';
-					selected = null;
-					dropdown.classList.remove('open');
-				}
-			};
-		}
-
-		async function loadRecentSongs() {
-			try {
-				const res = await fetch(`${API}/songs`);
-				const songs = await res.json();
-				const el = document.getElementById('recentSongs');
-				if (!songs.length) { el.innerHTML = ''; return; }
-				el.innerHTML = `<h2>Bài hát hiện có (${songs.length})</h2>` +
-					songs.slice(0, 10).map(s => `
-          <div class="upload-item">
-            <div class="upload-item-icon">🎵</div>
-            <div class="upload-item-info">
-              <div class="upload-item-title">${s.title}</div>
-              <div class="upload-item-sub">${s.artist_name} · ${s.album_title || 'No album'} · ${s.duration}s</div>
-            </div>
-            <div class="upload-item-badge">#${s.id}</div>
-          </div>`).join('');
-			} catch (e) { }
-		}
-
-		async function loadRecentAlbums() {
-			try {
-				const res = await fetch(`${API}/albums`);
-				const albums = await res.json();
-				const el = document.getElementById('recentAlbums');
-				if (!albums.length) { el.innerHTML = ''; return; }
-				el.innerHTML = `<h2>Album hiện có (${albums.length})</h2>` +
-					albums.map(a => `
-          <div class="upload-item">
-            <div class="upload-item-icon">💿</div>
-            <div class="upload-item-info">
-              <div class="upload-item-title">${a.title}</div>
-              <div class="upload-item-sub">${a.artist_name} · ${a.release_date ? a.release_date.substring(0, 10) : 'Chưa có ngày'}</div>
-            </div>
-            <div class="upload-item-badge">${a.type || 'album'}</div>
-          </div>`).join('');
-			} catch (e) { }
-		}
-
-		function initDropZone(zoneId, inputId, nameId) {
-			const zone = document.getElementById(zoneId);
-			const input = document.getElementById(inputId);
-			const name = document.getElementById(nameId);
-			input.addEventListener('change', () => {
-				if (input.files[0]) name.textContent = '📎 ' + input.files[0].name;
-			});
-			zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('drag-over'); });
-			zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
-			zone.addEventListener('drop', e => {
-				e.preventDefault();
-				zone.classList.remove('drag-over');
-				const file = e.dataTransfer.files[0];
-				if (file) {
-					const dt = new DataTransfer();
-					dt.items.add(file);
-					input.files = dt.files;
-					name.textContent = '📎 ' + file.name;
-				}
-			});
-		}
-
-		// ── UPLOAD SONG ──
-		document.getElementById('songForm').addEventListener('submit', async e => {
-			e.preventDefault();
-			const btn = document.getElementById('songSubmitBtn');
-			const progress = document.getElementById('songProgress');
-			const fill = document.getElementById('songProgressFill');
-			const label = document.getElementById('songProgressLabel');
-
-			const file = document.getElementById('songFile').files[0];
-			if (!file) { showToast('Vui lòng chọn file MP3!', 'error'); return; }
-
-			// Resolve artist (tạo mới nếu cần)
-			let artistId;
-			try {
-				artistId = await resolveArtistId(songArtistAC);
-			} catch (err) {
-				showToast(err.message, 'error');
-				btn.disabled = false;
-				return;
-			}
-			if (!artistId) { showToast('Vui lòng chọn hoặc nhập tên nghệ sĩ!', 'error'); btn.disabled = false; return; }
-
-			const formData = new FormData();
-			formData.append('title', document.getElementById('songTitle').value.trim());
-			formData.append('duration', document.getElementById('songDuration').value);
-			formData.append('artist_id', artistId);
-			formData.append('album_id', songAlbumAC?.getSelected()?.id || '');
-			formData.append('track_number', document.getElementById('songTrack').value);
-			formData.append('is_explicit', document.getElementById('songExplicit').value);
-			formData.append('lyrics', document.getElementById('songLyrics').value);
-			formData.append('audio', file);
-
-			btn.disabled = true;
-			progress.classList.add('show');
-			fill.style.width = '10%';
-			label.textContent = 'Đang upload file MP3...';
-
-			try {
-				let pct = 10;
-				const interval = setInterval(() => {
-					pct = Math.min(pct + 5, 85);
-					fill.style.width = pct + '%';
-				}, 300);
-
-				const res = await authFetch(`${API}/admin/songs`, { method: 'POST', body: formData });
-				clearInterval(interval);
-				fill.style.width = '100%';
-				label.textContent = 'Hoàn thành!';
-
-				const data = await res.json();
-				if (!res.ok) throw new Error(data.error || 'Upload thất bại');
-
-				const title = document.getElementById('songTitle').value;
-				if (data.auto_single) {
-					showToast(`Đã upload "${title}" · Tự động tạo Single cùng tên ✨`);
-				} else {
-					showToast(`Đã upload "${title}" thành công!`);
-				}
-				resetSongForm();
-				loadRecentSongs();
-				document.getElementById('songAlbum').innerHTML = '<option value="">-- Không thuộc album --</option>';
-				loadAlbums();
-			} catch (err) {
-				showToast(err.message, 'error');
-			} finally {
-				btn.disabled = false;
-				setTimeout(() => { progress.classList.remove('show'); fill.style.width = '0%'; }, 1500);
-			}
-		});
-
-		// ── CREATE ALBUM ──
-		document.getElementById('albumForm').addEventListener('submit', async e => {
-			e.preventDefault();
-			const btn = document.getElementById('albumSubmitBtn');
-			btn.disabled = true;
-
-			// Resolve artist
-			let artistId;
-			try {
-				artistId = await resolveArtistId(albumArtistAC);
-			} catch (err) {
-				showToast(err.message, 'error');
-				btn.disabled = false;
-				return;
-			}
-			if (!artistId) { showToast('Vui lòng chọn hoặc nhập tên nghệ sĩ!', 'error'); btn.disabled = false; return; }
-
-			const body = {
-				title: document.getElementById('albumTitle').value.trim(),
-				artist_id: artistId,
-				type: document.getElementById('albumType').value,
-				release_date: document.getElementById('albumDate').value || null,
-				cover_url: document.getElementById('albumCover').value.trim() || null,
-			};
-
-			try {
-				const res = await authFetch(`${API}/admin/albums`, {
-					method: 'POST',
-					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify(body),
-				});
-				const data = await res.json();
-				if (!res.ok) throw new Error(data.error || 'Tạo album thất bại');
-
-				showToast(`Đã tạo album "${body.title}" thành công! (ID: ${data.id})`);
-				resetAlbumForm();
-				await loadAlbums(); // refresh allAlbums
-				loadRecentAlbums();
-			} catch (err) {
-				showToast(err.message, 'error');
-			} finally {
-				btn.disabled = false;
-			}
-		});
-
-		function resetSongForm() {
-			document.getElementById('songForm').reset();
-			document.getElementById('mp3Name').textContent = '';
-			if (songArtistAC) songArtistAC.clear();
-			if (songAlbumAC) songAlbumAC.clear();
-		}
-		function resetAlbumForm() {
-			document.getElementById('albumForm').reset();
-			if (albumArtistAC) albumArtistAC.clear();
-		}
-
-		let songArtistAC, albumArtistAC, songAlbumAC;
-
-		function initAdmin() {
-			initDropZone('mp3Zone', 'songFile', 'mp3Name');
-			loadArtists();
-			loadAlbums();
-			loadRecentSongs();
-			loadRecentAlbums();
-
-			songArtistAC = initArtistAutocomplete('songArtistInput', 'songArtistId', 'songArtistDropdown', 'songArtistHint');
-			albumArtistAC = initArtistAutocomplete('albumArtistInput', 'albumArtistId', 'albumArtistDropdown', 'albumArtistHint');
-			songAlbumAC = initAlbumAutocomplete();
-
-			// Khi chọn artist → cập nhật hint album và refresh dropdown
-			const songArtistInput = document.getElementById('songArtistInput');
-			songArtistInput.addEventListener('input', () => {
-				songAlbumAC.clear();
-				document.getElementById('songAlbumHint').textContent = 'Đang lọc album theo nghệ sĩ...';
-			});
-
-			// Khi click vào album input → refresh ngay với artist hiện tại
-			document.getElementById('songAlbumInput').addEventListener('focus', () => {
-				const sel = songArtistAC?.getSelected();
-				if (sel && !sel.isNew) {
-					document.getElementById('songAlbumHint').innerHTML =
-						`<span style="color:rgba(255,255,255,0.4)">Lọc theo: <strong style="color:#fff">${sel.name}</strong></span>`;
-				}
-			});
-		}
-
-		// Helper: lấy artist_id — nếu NEW thì tạo mới trước
-		async function resolveArtistId(ac) {
-			const sel = ac.getSelected();
-			if (!sel) return null;
-			if (!sel.isNew) return parseInt(sel.id);
-
-			// Tạo artist mới
-			const res = await authFetch(`${API}/admin/artists`, {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ name: sel.name }),
-			});
-			const data = await res.json();
-			if (!res.ok) throw new Error(data.error || 'Không thể tạo nghệ sĩ');
-
-			// Cập nhật lại danh sách
-			allArtists.push({ id: data.id, name: sel.name });
-			return data.id;
-		}
-
-		checkAuth();
-	</script>
+	<script src="/js/admin.js"></script>
 </body>
 
 </html>

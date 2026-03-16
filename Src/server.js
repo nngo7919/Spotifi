@@ -25,6 +25,7 @@ app.use('/api/playlists', require('./routes/playlists'));
 app.use('/api/users', require('./routes/users'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/stream', require('./routes/stream'));
+app.use('/api/admin', require('./routes/admin'));
 
 // ── Mọi route khác → trả về login.html ──
 app.get('/{*path}', (req, res) => {
