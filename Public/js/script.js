@@ -777,7 +777,24 @@ document.addEventListener('DOMContentLoaded', () => {
 			};
 
 			// ── Click song row → phát ──
-			document.querySelectorAll('#artistTopSongs .song-row, #artistAllSongs .song-row').forEach(row => {
+			// Top 5: tìm đúng vị trí bài trong allSongs theo id
+			document.querySelectorAll('#artistTopSongs .song-row').forEach(row => {
+				row.addEventListener('click', () => {
+					const songId = parseInt(row.dataset.songId || row.dataset.idx);
+					const songs = allSongs.map(s => ({
+						id: s.id,
+						title: s.title,
+						artist: artist.name,
+						emoji: '🎵',
+					}));
+					// Tìm index thực trong allSongs theo id
+					const realIdx = allSongs.findIndex(s => s.id === songId);
+					window.playCollection(songs, realIdx >= 0 ? realIdx : 0);
+				});
+			});
+
+			// All songs: idx đã đúng với allSongs
+			document.querySelectorAll('#artistAllSongs .song-row').forEach(row => {
 				row.addEventListener('click', () => {
 					const idx = parseInt(row.dataset.idx);
 					const songs = allSongs.map(s => ({
