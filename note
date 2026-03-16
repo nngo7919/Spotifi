@@ -188,7 +188,6 @@ Khi queue còn ít bài, hệ thống truy vấn các bài tương tự (cùng g
 những điều cần sửa :
 Main page
 thanh PROGRESS
-- sẽ có nút hình mic và khi bấm vào thì nó sẽ chuyển sang trang lyric của bài hát đang phát. ( lyric feature )
 - bấm vào tên bài hát thì sẽ hiện ra trang album kể cả 
 thư viện
 - thư viện hiện like song , play list và followed arists
@@ -198,11 +197,14 @@ main page
 - ở tag tất cả sẽ là main page (bao gồm : play history ,nghệ sĩ nổi bật , hiện những gì music page và podcast page có )
 - ở tag nhạc sẽ là music page ( bao gồm : recomment song , remcomment album dựa trên table like song , play-history . song or album of followed artists, top 10 song most listend , top 10 album list listend .
 - ở tag podcast sẽ là podcast page ( bao gồm recomment podcast  , podcast of podcast followed )
+- nút mũi tên có thể trờ về trang trước hoặc trở về trang sau .
+- bấm nút trang chủ thì trở về main page , bỏ nút tìm kiếm 
 search page
 - khi bấm vào bài hát sẽ ra trang lyric
 - khi bấm vào album sẽ ra album page
 - khi bấm vào nghệ sĩ sẽ ra nghệ sĩ page
 - khi bấm vào podcast sẽ ra podcast page
+albume 
+- không thể next, prev bài hát
+- khi hết bài hát thì không thể tự next bài khác
 
-Admin page
-- không thể tạo album hay upload song
