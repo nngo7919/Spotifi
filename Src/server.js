@@ -26,6 +26,8 @@ app.use('/api/users', require('./routes/users'));
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/stream', require('./routes/stream'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/artist-dashboard', require('./routes/artist-dashboard'));
+app.use('/api/artist-requests', require('./routes/artist-requests'));
 
 // ── Mọi route khác → trả về login.html ──
 app.get('/{*path}', (req, res) => {

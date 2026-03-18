@@ -61,7 +61,7 @@
 			<!-- Library -->
 			<div class="library-header">
 				<span class="label">Thư viện</span>
-				<button class="btn-icon" title="Tạo playlist">
+				<button class="btn-icon" id="createPlaylistBtn" title="Tạo playlist mới">
 					<svg viewBox="0 0 24 24" fill="currentColor">
 						<path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z" />
 					</svg>
@@ -69,70 +69,7 @@
 			</div>
 
 			<div id="libraryList">
-				<!-- Library items -->
-				<div class="lib-item" data-track="Bài hát đã thích" data-artist="Bạn" data-emoji="💚">
-					<div class="lib-thumb grad-17">💚</div>
-					<div class="overflow-hidden">
-						<div class="lib-name">Bài hát đã thích</div>
-						<div class="lib-meta">Danh sách phát • 7 bài</div>
-					</div>
-				</div>
-				<div class="lib-item" data-track="True Damage" data-artist="True Damage" data-emoji="🎮">
-					<div class="lib-thumb grad-1">🎮</div>
-					<div class="overflow-hidden">
-						<div class="lib-name">True Damage</div>
-						<div class="lib-meta">Nghệ sĩ</div>
-					</div>
-				</div>
-				<div class="lib-item" data-track="POP/STARS" data-artist="K/DA" data-emoji="✨">
-					<div class="lib-thumb grad-2">✨</div>
-					<div class="overflow-hidden">
-						<div class="lib-name">K/DA</div>
-						<div class="lib-meta">Nghệ sĩ</div>
-					</div>
-				</div>
-				<div class="lib-item" data-track="Mortal Reminder" data-artist="Pentakill" data-emoji="⚔️">
-					<div class="lib-thumb grad-5">⚔️</div>
-					<div class="overflow-hidden">
-						<div class="lib-name">Pentakill</div>
-						<div class="lib-meta">Nghệ sĩ</div>
-					</div>
-				</div>
-				<div class="lib-item" data-track="RISE" data-artist="Seraphine" data-emoji="🌿">
-					<div class="lib-thumb grad-3">🌿</div>
-					<div class="overflow-hidden">
-						<div class="lib-name">Seraphine</div>
-						<div class="lib-meta">Nghệ sĩ</div>
-					</div>
-				</div>
-				<div class="lib-item" data-track="Warriors" data-artist="League of Legends" data-emoji="🎯">
-					<div class="lib-thumb grad-12">🎯</div>
-					<div class="overflow-hidden">
-						<div class="lib-name">League of Legends</div>
-						<div class="lib-meta">Nghệ sĩ</div>
-					</div>
-				</div>
-				<div class="lib-item" data-track="Anh Nhà Ở Đâu Thế" data-artist="AMEE" data-emoji="🎤">
-					<div class="lib-thumb grad-4">🎤</div>
-					<div class="overflow-hidden">
-						<div class="lib-name">AMEE</div>
-						<div class="lib-meta">Nghệ sĩ</div>
-					</div>
-				</div>
-				<div class="lib-item" data-track="thank u, next" data-artist="Ariana Grande" data-emoji="💃">
-					<div class="lib-thumb grad-6">💃</div>
-					<div class="overflow-hidden">
-						<div class="lib-name">Ariana Grande</div>
-						<div class="lib-meta">Nghệ sĩ</div>
-					</div>
-				</div>
-				<div class="lib-item" data-track="Attention" data-artist="Charlie Puth" data-emoji="🎹">
-					<div class="lib-thumb grad-14">🎹</div>
-					<div class="overflow-hidden">
-						<div class="lib-name">Charlie Puth</div>
-						<div class="lib-meta">Nghệ sĩ</div>
-					</div>
-				</div>
+				<!-- Sẽ được load động từ API -->
 			</div>
 		</aside>
 
@@ -184,14 +121,23 @@
 								<div class="user-dropdown-info">
 									<div class="ud-name" id="udName">--</div>
 									<div class="ud-email" id="udEmail">--</div>
+									<div id="udRoleBadge" style="display:none;margin-top:4px;
+                  font-size:11px;font-weight:700;color:#1db954;">🎤 Nghệ sĩ</div>
 								</div>
 								<hr class="ud-divider" />
 								<a href="#" class="ud-item">Tài khoản</a>
 								<a href="#" class="ud-item">Hồ sơ</a>
-								<hr class="ud-divider" />
-								<button class="ud-item ud-logout" id="logoutBtn">
-									Đăng xuất
+								<!-- Artist links — hiện theo role -->
+								<a href="/html/artist-dashboard.html" class="ud-item" id="udArtistDashboard"
+									style="display:none;color:#1db954;">🎤 Artist Dashboard</a>
+								<button class="ud-item" id="udBecomeArtistBtn" style="display:none;color:#1db954;background:none;border:none;
+                width:100%;text-align:left;cursor:pointer;font-family:inherit;font-size:14px;">
+									🎤 Trở thành nghệ sĩ
 								</button>
+								<div id="udRequestStatus" style="display:none;padding:6px 16px;
+                font-size:12px;color:#b3b3b3;"></div>
+								<hr class="ud-divider" />
+								<button class="ud-item ud-logout" id="logoutBtn">Đăng xuất</button>
 							</div>
 						</div>
 					</div>
@@ -492,7 +438,7 @@
 								<svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
 									<path d="M8 5v14l11-7z" />
 								</svg>
-
+								Phát tất cả
 							</button>
 							<button class="btn-follow" id="artistFollowBtn">Theo dõi</button>
 						</div>
@@ -637,6 +583,59 @@
 				</div>
 			</div><!-- /lyricsPage -->
 
+			<!-- ==============================
+         PLAYLIST PAGE (SPA)
+         ============================== -->
+			<div id="playlistPage" style="display:none;">
+
+				<!-- Hero -->
+				<div class="album-hero" id="plHero">
+					<div class="album-hero-bg" id="plHeroBg"></div>
+					<div class="album-hero-overlay"></div>
+					<div class="album-hero-info">
+						<div class="album-hero-cover" id="plCover">🎵</div>
+						<div class="album-hero-meta">
+							<div class="album-hero-type">Danh sách phát</div>
+							<h1 class="album-hero-title" id="plTitle">--</h1>
+							<div class="album-hero-artist">
+								<div class="album-artist-avatar" id="plUserAvatar">👤</div>
+								<span class="album-artist-name" id="plUserName"></span>
+							</div>
+							<div class="album-hero-stats" id="plStats"></div>
+							<div class="d-flex align-items-center gap-3 mt-4">
+								<button class="sw-btn-play" id="plPlayAllBtn">
+									<svg viewBox="0 0 24 24" fill="currentColor" width="22" height="22">
+										<path d="M8 5v14l11-7z" />
+									</svg>
+								</button>
+								<button class="btn-follow" id="plEditBtn" style="opacity:0.85;">✏️ Sửa</button>
+								<button class="btn-follow" id="plDeleteBtn"
+									style="opacity:0.7;color:#e53935;border-color:#e53935;">🗑️ Xóa</button>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Song list -->
+				<div class="px-4 py-4">
+					<div class="album-song-header">
+						<div class="album-col-num">#</div>
+						<div class="album-col-info">Tiêu đề</div>
+						<div class="album-col-plays">Thêm vào lúc</div>
+						<div class="album-col-dur">
+							<svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+								<path
+									d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm4.24 14.49l-5.23-3.14V7h1.5v5.68l4.5 2.69-1.27 1.62-.5-.2z" />
+							</svg>
+						</div>
+					</div>
+					<div class="album-song-divider"></div>
+					<div id="plSongList"></div>
+					<div class="album-footer" id="plFooter"></div>
+				</div>
+
+			</div><!-- /playlistPage -->
+
 		</main>
 
 		<!-- ==============================
@@ -648,8 +647,8 @@
 			<div class="d-flex align-items-center gap-3">
 				<div class="now-thumb grad-13" id="nowThumb">🌙</div>
 				<div class="overflow-hidden">
-					<div class="track-name" id="trackName">渇愛エチュード</div>
-					<div class="track-artist" id="trackArtist">YOASOBI</div>
+					<div class="track-name" id="trackName" style="cursor:pointer;" title="Xem album">渇愛エチュード</div>
+					<div class="track-artist" id="trackArtist" style="cursor:pointer;" title="Xem nghệ sĩ">YOASOBI</div>
 				</div>
 				<div class="playing-bars" id="playingBars">
 					<span></span><span></span><span></span>
@@ -754,6 +753,123 @@
 
 	<!-- Custom JS -->
 	<script src="../js/script.js"></script>
+	<!-- ── Playlist Create/Edit Modal ── -->
+	<div id="plModal" style="
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75);
+  z-index:2000; align-items:center; justify-content:center; backdrop-filter:blur(6px);">
+		<div style="
+    background:#181818; border:1px solid #2a2a2a; border-radius:16px;
+    padding:32px; width:420px; max-width:95vw;">
+			<h2 id="plModalTitle" style="font-size:20px;font-weight:900;margin-bottom:24px;">Tạo playlist mới</h2>
+			<div style="display:flex;flex-direction:column;gap:16px;">
+
+				<!-- Cover preview -->
+				<div style="display:flex;gap:16px;align-items:flex-start;">
+					<div id="plModalCoverPreview" style="
+          width:80px;height:80px;border-radius:10px;background:#282828;
+          display:flex;align-items:center;justify-content:center;font-size:32px;
+          overflow:hidden;flex-shrink:0;border:1px solid #2a2a2a;">🎵</div>
+					<div style="flex:1;display:flex;flex-direction:column;gap:8px;">
+						<label
+							style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#b3b3b3;">URL
+							ảnh bìa</label>
+						<input id="plModalCover" type="text" placeholder="https://... (để trống nếu chưa có)" style="background:#282828;border:1px solid #3a3a3a;border-radius:8px;padding:10px 12px;
+            font-size:13px;color:#fff;font-family:inherit;outline:none;width:100%;"
+							oninput="updatePlModalCover(this.value)">
+						<div id="plModalCoverStatus" style="font-size:11px;color:#b3b3b3;"></div>
+					</div>
+				</div>
+
+				<!-- Name -->
+				<div>
+					<label
+						style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#b3b3b3;display:block;margin-bottom:8px;">Tên
+						playlist *</label>
+					<input id="plModalName" type="text" placeholder="VD: Nhạc buổi sáng" style="background:#282828;border:1px solid #3a3a3a;border-radius:8px;padding:12px 14px;
+          font-size:14px;color:#fff;font-family:inherit;outline:none;width:100%;">
+				</div>
+
+			</div>
+			<div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end;">
+				<button onclick="closePlModal()" style="
+        padding:11px 24px;border-radius:50px;border:1px solid #3a3a3a;
+        background:none;color:#b3b3b3;font-size:14px;font-weight:700;cursor:pointer;">Hủy</button>
+				<button id="plModalSaveBtn" onclick="savePlModal()" style="
+        padding:11px 24px;border-radius:50px;border:none;
+        background:#1db954;color:#000;font-size:14px;font-weight:700;cursor:pointer;">Lưu</button>
+			</div>
+		</div>
+	</div>
+
+	<!-- ── Add to Playlist context menu ── -->
+	<div id="addToPlMenu" style="
+  display:none; position:fixed; background:#282828; border:1px solid #3a3a3a;
+  border-radius:10px; z-index:3000; min-width:220px; box-shadow:0 8px 24px rgba(0,0,0,0.6);
+  padding:6px 0; font-size:14px;">
+		<div
+			style="padding:10px 16px 6px;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:#b3b3b3;">
+			Thêm vào playlist</div>
+		<div id="addToPlList"></div>
+	</div>
+
+	<!-- ── Become Artist Modal ── -->
+	<div id="becomeArtistModal" style="
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.75);
+  z-index:2000; align-items:center; justify-content:center; backdrop-filter:blur(6px);">
+		<div style="
+    background:#181818; border:1px solid #2a2a2a; border-radius:16px;
+    padding:32px; width:460px; max-width:95vw;">
+
+			<div style="text-align:center;margin-bottom:24px;">
+				<div style="font-size:36px;margin-bottom:8px;">🎤</div>
+				<h2 style="font-size:20px;font-weight:900;margin:0 0 6px;">Trở thành nghệ sĩ</h2>
+				<p style="font-size:13px;color:#b3b3b3;margin:0;">Gửi yêu cầu để được duyệt lên tài khoản nghệ sĩ.</p>
+			</div>
+
+			<div style="display:flex;flex-direction:column;gap:16px;">
+				<div>
+					<label style="font-size:11px;font-weight:700;text-transform:uppercase;
+          letter-spacing:1px;color:#b3b3b3;display:block;margin-bottom:8px;">
+						Tên nghệ sĩ <span style="color:#1db954;">*</span>
+					</label>
+					<input id="reqArtistName" type="text" placeholder="Tên bạn muốn hiển thị trên SoundWave" style="background:#282828;border:1px solid #3a3a3a;border-radius:8px;
+          padding:12px 14px;font-size:14px;color:#fff;font-family:inherit;
+          outline:none;width:100%;box-sizing:border-box;">
+				</div>
+				<div>
+					<label style="font-size:11px;font-weight:700;text-transform:uppercase;
+          letter-spacing:1px;color:#b3b3b3;display:block;margin-bottom:8px;">
+						Giới thiệu bản thân
+					</label>
+					<textarea id="reqBio" placeholder="Bạn là ai? Thể loại nhạc bạn làm?..." style="background:#282828;border:1px solid #3a3a3a;border-radius:8px;
+          padding:12px 14px;font-size:14px;color:#fff;font-family:inherit;
+          outline:none;width:100%;box-sizing:border-box;resize:vertical;min-height:90px;"></textarea>
+				</div>
+				<div>
+					<label style="font-size:11px;font-weight:700;text-transform:uppercase;
+          letter-spacing:1px;color:#b3b3b3;display:block;margin-bottom:8px;">
+						Lý do muốn trở thành nghệ sĩ
+					</label>
+					<textarea id="reqReason" placeholder="Tại sao bạn muốn upload nhạc lên SoundWave?..." style="background:#282828;border:1px solid #3a3a3a;border-radius:8px;
+          padding:12px 14px;font-size:14px;color:#fff;font-family:inherit;
+          outline:none;width:100%;box-sizing:border-box;resize:vertical;min-height:70px;"></textarea>
+				</div>
+				<div id="reqError" style="font-size:13px;color:#e53935;display:none;"></div>
+			</div>
+
+			<div style="display:flex;gap:12px;margin-top:24px;justify-content:flex-end;">
+				<button onclick="closeBecomeArtistModal()" style="
+        padding:11px 24px;border-radius:50px;border:1px solid #3a3a3a;
+        background:none;color:#b3b3b3;font-size:14px;font-weight:700;cursor:pointer;
+        font-family:inherit;">Hủy</button>
+				<button id="reqSubmitBtn" onclick="submitArtistRequest()" style="
+        padding:11px 24px;border-radius:50px;border:none;
+        background:#1db954;color:#000;font-size:14px;font-weight:700;
+        cursor:pointer;font-family:inherit;">Gửi yêu cầu</button>
+			</div>
+		</div>
+	</div>
+
 </body>
 
 </html>

@@ -2,9 +2,7 @@
 --  SoundWave Database Schema (MySQL)
 -- =============================================
 
-CREATE DATABASE IF NOT EXISTS soundwave
-  CHARACTER SET utf8mb4
-  COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS soundwave CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
 USE soundwave;
 
@@ -12,191 +10,287 @@ USE soundwave;
 -- 1. USERS
 -- ─────────────────────────────────────────────
 CREATE TABLE users (
-  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
-  username     VARCHAR(50)     NOT NULL UNIQUE,
-  email        VARCHAR(100)    NOT NULL UNIQUE,
-  password     VARCHAR(255)    NOT NULL,
-  avatar_url   VARCHAR(500)    DEFAULT NULL,
-  country      VARCHAR(50)     DEFAULT NULL,
-  birthday     DATE            DEFAULT NULL,
-  created_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-  updated_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(50) NOT NULL UNIQUE,
+    email VARCHAR(100) NOT NULL UNIQUE,
+    password VARCHAR(255) NOT NULL,
+    avatar_url VARCHAR(500) DEFAULT NULL,
+    country VARCHAR(50) DEFAULT NULL,
+    birthday DATE DEFAULT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
 -- ─────────────────────────────────────────────
 -- 2. SUBSCRIPTIONS
 -- ─────────────────────────────────────────────
 CREATE TABLE subscriptions (
-  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
-  user_id      INT UNSIGNED    NOT NULL,
-  plan         ENUM('free','premium','student','family') DEFAULT 'free',
-  started_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-  expires_at   TIMESTAMP       DEFAULT NULL,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    plan ENUM(
+        'free',
+        'premium',
+        'student',
+        'family'
+    ) DEFAULT 'free',
+    started_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP DEFAULT NULL,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 -- ─────────────────────────────────────────────
 -- 3. GENRES
 -- ─────────────────────────────────────────────
 CREATE TABLE genres (
-  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
-  name         VARCHAR(50)     NOT NULL UNIQUE,
-  cover_url    VARCHAR(500)    DEFAULT NULL
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(50) NOT NULL UNIQUE,
+    cover_url VARCHAR(500) DEFAULT NULL
 );
 
 -- ─────────────────────────────────────────────
 -- 4. ARTISTS
 -- ─────────────────────────────────────────────
 CREATE TABLE artists (
-  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
-  name         VARCHAR(100)    NOT NULL,
-  bio          TEXT            DEFAULT NULL,
-  avatar_url   VARCHAR(500)    DEFAULT NULL,
-  country      VARCHAR(50)     DEFAULT NULL,
-  verified     TINYINT(1)      DEFAULT 0,
-  created_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    bio TEXT DEFAULT NULL,
+    avatar_url VARCHAR(500) DEFAULT NULL,
+    country VARCHAR(50) DEFAULT NULL,
+    verified TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 -- ─────────────────────────────────────────────
 -- 5. ALBUMS
 -- ─────────────────────────────────────────────
 CREATE TABLE albums (
-  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
-  artist_id    INT UNSIGNED    NOT NULL,
-  title        VARCHAR(200)    NOT NULL,
-  cover_url    VARCHAR(500)    DEFAULT NULL,
-  release_date DATE            DEFAULT NULL,
-  type         ENUM('album','single','ep') DEFAULT 'album',
-  created_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    artist_id INT UNSIGNED NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    cover_url VARCHAR(500) DEFAULT NULL,
+    release_date DATE DEFAULT NULL,
+    type ENUM('album', 'single', 'ep') DEFAULT 'album',
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE
 );
 
 -- ─────────────────────────────────────────────
 -- 6. SONGS
 -- ─────────────────────────────────────────────
 CREATE TABLE songs (
-  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
-  album_id     INT UNSIGNED    DEFAULT NULL,
-  artist_id    INT UNSIGNED    NOT NULL,
-  title        VARCHAR(200)    NOT NULL,
-  duration     INT UNSIGNED    NOT NULL COMMENT 'seconds',
-  file_url     VARCHAR(500)    NOT NULL,
-  cover_url    VARCHAR(500)    DEFAULT NULL,
-  track_number TINYINT UNSIGNED DEFAULT 1,
-  plays_count  BIGINT UNSIGNED DEFAULT 0,
-  is_explicit  TINYINT(1)      DEFAULT 0,
-  created_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (album_id)  REFERENCES albums(id)  ON DELETE SET NULL,
-  FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    album_id INT UNSIGNED DEFAULT NULL,
+    artist_id INT UNSIGNED NOT NULL,
+    title VARCHAR(200) NOT NULL,
+    duration INT UNSIGNED NOT NULL COMMENT 'seconds',
+    file_url VARCHAR(500) NOT NULL,
+    cover_url VARCHAR(500) DEFAULT NULL,
+    track_number TINYINT UNSIGNED DEFAULT 1,
+    plays_count BIGINT UNSIGNED DEFAULT 0,
+    is_explicit TINYINT(1) DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (album_id) REFERENCES albums (id) ON DELETE SET NULL,
+    FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE
 );
 
 -- ─────────────────────────────────────────────
 -- 7. SONG_GENRES (trung gian)
 -- ─────────────────────────────────────────────
 CREATE TABLE song_genres (
-  song_id      INT UNSIGNED    NOT NULL,
-  genre_id     INT UNSIGNED    NOT NULL,
-  PRIMARY KEY (song_id, genre_id),
-  FOREIGN KEY (song_id)  REFERENCES songs(id)  ON DELETE CASCADE,
-  FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE CASCADE
+    song_id INT UNSIGNED NOT NULL,
+    genre_id INT UNSIGNED NOT NULL,
+    PRIMARY KEY (song_id, genre_id),
+    FOREIGN KEY (song_id) REFERENCES songs (id) ON DELETE CASCADE,
+    FOREIGN KEY (genre_id) REFERENCES genres (id) ON DELETE CASCADE
 );
 
 -- ─────────────────────────────────────────────
 -- 8. PLAYLISTS
 -- ─────────────────────────────────────────────
 CREATE TABLE playlists (
-  id           INT UNSIGNED    AUTO_INCREMENT PRIMARY KEY,
-  user_id      INT UNSIGNED    NOT NULL,
-  name         VARCHAR(200)    NOT NULL,
-  description  TEXT            DEFAULT NULL,
-  cover_url    VARCHAR(500)    DEFAULT NULL,
-  is_public    TINYINT(1)      DEFAULT 1,
-  created_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-  updated_at   TIMESTAMP       DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    name VARCHAR(200) NOT NULL,
+    description TEXT DEFAULT NULL,
+    cover_url VARCHAR(500) DEFAULT NULL,
+    is_public TINYINT(1) DEFAULT 1,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 -- ─────────────────────────────────────────────
 -- 9. PLAYLIST_SONGS (trung gian)
 -- ─────────────────────────────────────────────
 CREATE TABLE playlist_songs (
-  playlist_id  INT UNSIGNED    NOT NULL,
-  song_id      INT UNSIGNED    NOT NULL,
-  position     SMALLINT UNSIGNED DEFAULT 0,
-  added_at     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (playlist_id, song_id),
-  FOREIGN KEY (playlist_id) REFERENCES playlists(id) ON DELETE CASCADE,
-  FOREIGN KEY (song_id)     REFERENCES songs(id)     ON DELETE CASCADE
+    playlist_id INT UNSIGNED NOT NULL,
+    song_id INT UNSIGNED NOT NULL,
+    position SMALLINT UNSIGNED DEFAULT 0,
+    added_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (playlist_id, song_id),
+    FOREIGN KEY (playlist_id) REFERENCES playlists (id) ON DELETE CASCADE,
+    FOREIGN KEY (song_id) REFERENCES songs (id) ON DELETE CASCADE
 );
 
 -- ─────────────────────────────────────────────
 -- 10. LIKED_SONGS
 -- ─────────────────────────────────────────────
 CREATE TABLE liked_songs (
-  user_id      INT UNSIGNED    NOT NULL,
-  song_id      INT UNSIGNED    NOT NULL,
-  liked_at     TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (user_id, song_id),
-  FOREIGN KEY (user_id) REFERENCES users(id)  ON DELETE CASCADE,
-  FOREIGN KEY (song_id) REFERENCES songs(id)  ON DELETE CASCADE
+    user_id INT UNSIGNED NOT NULL,
+    song_id INT UNSIGNED NOT NULL,
+    liked_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, song_id),
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (song_id) REFERENCES songs (id) ON DELETE CASCADE
 );
 
 -- ─────────────────────────────────────────────
 -- 11. FOLLOWED_ARTISTS
 -- ─────────────────────────────────────────────
 CREATE TABLE followed_artists (
-  user_id      INT UNSIGNED    NOT NULL,
-  artist_id    INT UNSIGNED    NOT NULL,
-  followed_at  TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (user_id, artist_id),
-  FOREIGN KEY (user_id)   REFERENCES users(id)   ON DELETE CASCADE,
-  FOREIGN KEY (artist_id) REFERENCES artists(id) ON DELETE CASCADE
+    user_id INT UNSIGNED NOT NULL,
+    artist_id INT UNSIGNED NOT NULL,
+    followed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (user_id, artist_id),
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE CASCADE
 );
 
 -- ─────────────────────────────────────────────
 -- 12. PLAY_HISTORY
 -- ─────────────────────────────────────────────
 CREATE TABLE play_history (
-  id           BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-  user_id      INT UNSIGNED    NOT NULL,
-  song_id      INT UNSIGNED    NOT NULL,
-  played_at    TIMESTAMP       DEFAULT CURRENT_TIMESTAMP,
-  FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-  FOREIGN KEY (song_id) REFERENCES songs(id) ON DELETE CASCADE,
-  INDEX idx_user_played (user_id, played_at DESC)
+    id BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    song_id INT UNSIGNED NOT NULL,
+    played_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE,
+    FOREIGN KEY (song_id) REFERENCES songs (id) ON DELETE CASCADE,
+    INDEX idx_user_played (user_id, played_at DESC)
 );
 
 -- =============================================
 --  SAMPLE DATA
 -- =============================================
 
-INSERT INTO genres (name) VALUES
-  ('Pop'), ('K-Pop'), ('J-Pop'), ('V-Pop'),
-  ('Rock'), ('Hip-Hop'), ('Indie'), ('Electronic');
+INSERT INTO
+    genres (name)
+VALUES ('Pop'),
+    ('K-Pop'),
+    ('J-Pop'),
+    ('V-Pop'),
+    ('Rock'),
+    ('Hip-Hop'),
+    ('Indie'),
+    ('Electronic');
 
-INSERT INTO artists (name, country, verified) VALUES
-  ('YOASOBI',     'Japan',       1),
-  ('AMEE',        'Vietnam',     1),
-  ('IVE',         'South Korea', 1),
-  ('Charlie Puth','USA',         1),
-  ('Bruno Mars',  'USA',         1);
+INSERT INTO
+    artists (name, country, verified)
+VALUES ('YOASOBI', 'Japan', 1),
+    ('AMEE', 'Vietnam', 1),
+    ('IVE', 'South Korea', 1),
+    ('Charlie Puth', 'USA', 1),
+    ('Bruno Mars', 'USA', 1);
 
-INSERT INTO albums (artist_id, title, release_date, type) VALUES
-  (1, '渇愛エチュード',          '2024-01-15', 'album'),
-  (2, 'Từng Ngày Như Mãi Mãi',  '2024-03-20', 'album'),
-  (3, 'K-Pop Ngay Lúc Này',     '2024-02-10', 'ep'),
-  (4, 'Nine Track Mind',        '2016-01-27', 'album');
+INSERT INTO
+    albums (
+        artist_id,
+        title,
+        release_date,
+        type
+    )
+VALUES (
+        1,
+        '渇愛エチュード',
+        '2024-01-15',
+        'album'
+    ),
+    (
+        2,
+        'Từng Ngày Như Mãi Mãi',
+        '2024-03-20',
+        'album'
+    ),
+    (
+        3,
+        'K-Pop Ngay Lúc Này',
+        '2024-02-10',
+        'ep'
+    ),
+    (
+        4,
+        'Nine Track Mind',
+        '2016-01-27',
+        'album'
+    );
 
-INSERT INTO songs (album_id, artist_id, title, duration, file_url, track_number) VALUES
-  (1, 1, '渇愛エチュード',          215, '/audio/katuai.mp3',    1),
-  (1, 1, 'Idol',                   212, '/audio/idol.mp3',       2),
-  (2, 2, 'Từng Ngày Như Mãi Mãi', 198, '/audio/tungngay.mp3',   1),
-  (2, 2, 'Đánh Đổi',              225, '/audio/danhdoi.mp3',    2),
-  (3, 3, 'Eleven',                 187, '/audio/eleven.mp3',     1),
-  (4, 4, 'Attention',             207, '/audio/attention.mp3',  1),
-  (4, 4, 'We Dont Talk Anymore',  213, '/audio/wedont.mp3',     2);
+INSERT INTO
+    songs (
+        album_id,
+        artist_id,
+        title,
+        duration,
+        file_url,
+        track_number
+    )
+VALUES (
+        1,
+        1,
+        '渇愛エチュード',
+        215,
+        '/audio/katuai.mp3',
+        1
+    ),
+    (
+        1,
+        1,
+        'Idol',
+        212,
+        '/audio/idol.mp3',
+        2
+    ),
+    (
+        2,
+        2,
+        'Từng Ngày Như Mãi Mãi',
+        198,
+        '/audio/tungngay.mp3',
+        1
+    ),
+    (
+        2,
+        2,
+        'Đánh Đổi',
+        225,
+        '/audio/danhdoi.mp3',
+        2
+    ),
+    (
+        3,
+        3,
+        'Eleven',
+        187,
+        '/audio/eleven.mp3',
+        1
+    ),
+    (
+        4,
+        4,
+        'Attention',
+        207,
+        '/audio/attention.mp3',
+        1
+    ),
+    (
+        4,
+        4,
+        'We Dont Talk Anymore',
+        213,
+        '/audio/wedont.mp3',
+        2
+    );
 
-  -- =============================================
+-- =============================================
 --  SoundWave - Tất cả câu lệnh JOIN
 -- =============================================
 
@@ -206,148 +300,170 @@ USE soundwave;
 -- 1. LẤY TẤT CẢ BÀI HÁT + NGHỆ SĨ + ALBUM
 -- ─────────────────────────────────────────────
 SELECT
-    s.id            AS song_id,
-    s.title         AS bai_hat,
-    s.duration      AS thoi_luong_giay,
-    s.plays_count   AS luot_nghe,
+    s.id AS song_id,
+    s.title AS bai_hat,
+    s.duration AS thoi_luong_giay,
+    s.plays_count AS luot_nghe,
     s.is_explicit,
-    a.name          AS nghe_si,
-    a.avatar_url    AS anh_nghe_si,
-    al.title        AS album,
-    al.cover_url    AS anh_album,
+    a.name AS nghe_si,
+    a.avatar_url AS anh_nghe_si,
+    al.title AS album,
+    al.cover_url AS anh_album,
     al.release_date AS ngay_phat_hanh
-FROM songs s
-JOIN artists a  ON s.artist_id = a.id
-LEFT JOIN albums al ON s.album_id = al.id
+FROM
+    songs s
+    JOIN artists a ON s.artist_id = a.id
+    LEFT JOIN albums al ON s.album_id = al.id
 ORDER BY s.plays_count DESC;
 
 -- ─────────────────────────────────────────────
 -- 2. LẤY CHI TIẾT 1 BÀI HÁT THEO ID
 -- ─────────────────────────────────────────────
 SELECT
-    s.id, s.title, s.duration, s.file_url,
-    s.cover_url, s.plays_count, s.is_explicit,
-    a.id   AS artist_id,
+    s.id,
+    s.title,
+    s.duration,
+    s.file_url,
+    s.cover_url,
+    s.plays_count,
+    s.is_explicit,
+    a.id AS artist_id,
     a.name AS artist_name,
-    al.id   AS album_id,
+    al.id AS album_id,
     al.title AS album_title,
     al.cover_url AS album_cover,
     GROUP_CONCAT(g.name SEPARATOR ', ') AS genres
-FROM songs s
-JOIN artists a       ON s.artist_id = a.id
-LEFT JOIN albums al  ON s.album_id  = al.id
-LEFT JOIN song_genres sg ON s.id    = sg.song_id
-LEFT JOIN genres g   ON sg.genre_id = g.id
-WHERE s.id = 1
-GROUP BY s.id;
+FROM
+    songs s
+    JOIN artists a ON s.artist_id = a.id
+    LEFT JOIN albums al ON s.album_id = al.id
+    LEFT JOIN song_genres sg ON s.id = sg.song_id
+    LEFT JOIN genres g ON sg.genre_id = g.id
+WHERE
+    s.id = 1
+GROUP BY
+    s.id;
 
 -- ─────────────────────────────────────────────
 -- 3. LẤY TẤT CẢ BÀI HÁT TRONG 1 ALBUM
 -- ─────────────────────────────────────────────
 SELECT
-    s.id, s.title, s.duration,
-    s.track_number, s.plays_count,
+    s.id,
+    s.title,
+    s.duration,
+    s.track_number,
+    s.plays_count,
     a.name AS artist_name,
     al.title AS album_title,
-    al.cover_url, al.release_date
-FROM songs s
-JOIN artists a ON s.artist_id = a.id
-JOIN albums  al ON s.album_id = al.id
-WHERE al.id = 1
+    al.cover_url,
+    al.release_date
+FROM
+    songs s
+    JOIN artists a ON s.artist_id = a.id
+    JOIN albums al ON s.album_id = al.id
+WHERE
+    al.id = 1
 ORDER BY s.track_number;
 
 -- ─────────────────────────────────────────────
 -- 4. LẤY TẤT CẢ BÀI HÁT CỦA 1 NGHỆ SĨ
 -- ─────────────────────────────────────────────
-SELECT
-    s.id, s.title, s.duration, s.plays_count,
-    al.title AS album, al.cover_url,
-    al.release_date
+SELECT s.id, s.title, s.duration, s.plays_count, al.title AS album, al.cover_url, al.release_date
 FROM songs s
-LEFT JOIN albums al ON s.album_id = al.id
-WHERE s.artist_id = 1
+    LEFT JOIN albums al ON s.album_id = al.id
+WHERE
+    s.artist_id = 1
 ORDER BY al.release_date DESC, s.track_number;
 
 -- ─────────────────────────────────────────────
 -- 5. LẤY PLAYLIST CỦA USER + DANH SÁCH BÀI HÁT
 -- ─────────────────────────────────────────────
 SELECT
-    p.id         AS playlist_id,
-    p.name       AS playlist_name,
+    p.id AS playlist_id,
+    p.name AS playlist_name,
     p.cover_url,
-    s.id         AS song_id,
-    s.title      AS bai_hat,
+    s.id AS song_id,
+    s.title AS bai_hat,
     s.duration,
-    a.name       AS nghe_si,
+    a.name AS nghe_si,
     al.cover_url AS anh_album,
     ps.position,
     ps.added_at
-FROM playlists p
-JOIN playlist_songs ps ON p.id        = ps.playlist_id
-JOIN songs          s  ON ps.song_id  = s.id
-JOIN artists        a  ON s.artist_id = a.id
-LEFT JOIN albums    al ON s.album_id  = al.id
-WHERE p.user_id = 1
+FROM
+    playlists p
+    JOIN playlist_songs ps ON p.id = ps.playlist_id
+    JOIN songs s ON ps.song_id = s.id
+    JOIN artists a ON s.artist_id = a.id
+    LEFT JOIN albums al ON s.album_id = al.id
+WHERE
+    p.user_id = 1
 ORDER BY p.id, ps.position;
 
 -- ─────────────────────────────────────────────
 -- 6. LẤY TẤT CẢ PLAYLIST CỦA USER (không kèm bài hát)
 -- ─────────────────────────────────────────────
-SELECT
-    p.id, p.name, p.cover_url,
-    p.is_public, p.created_at,
-    COUNT(ps.song_id) AS so_bai_hat
-FROM playlists p
-LEFT JOIN playlist_songs ps ON p.id = ps.playlist_id
-WHERE p.user_id = 1
-GROUP BY p.id
+SELECT p.id, p.name, p.cover_url, p.is_public, p.created_at, COUNT(ps.song_id) AS so_bai_hat
+FROM
+    playlists p
+    LEFT JOIN playlist_songs ps ON p.id = ps.playlist_id
+WHERE
+    p.user_id = 1
+GROUP BY
+    p.id
 ORDER BY p.updated_at DESC;
 
 -- ─────────────────────────────────────────────
 -- 7. LẤY BÀI HÁT ĐÃ THÍCH CỦA USER
 -- ─────────────────────────────────────────────
 SELECT
-    s.id, s.title, s.duration,
-    s.file_url, s.cover_url,
-    a.name       AS nghe_si,
-    al.title     AS album,
+    s.id,
+    s.title,
+    s.duration,
+    s.file_url,
+    s.cover_url,
+    a.name AS nghe_si,
+    al.title AS album,
     al.cover_url AS anh_album,
     ls.liked_at
-FROM liked_songs ls
-JOIN songs   s  ON ls.song_id  = s.id
-JOIN artists a  ON s.artist_id = a.id
-LEFT JOIN albums al ON s.album_id = al.id
-WHERE ls.user_id = 1
+FROM
+    liked_songs ls
+    JOIN songs s ON ls.song_id = s.id
+    JOIN artists a ON s.artist_id = a.id
+    LEFT JOIN albums al ON s.album_id = al.id
+WHERE
+    ls.user_id = 1
 ORDER BY ls.liked_at DESC;
 
 -- ─────────────────────────────────────────────
 -- 8. LẤY LỊCH SỬ NGHE CỦA USER (20 bài gần nhất)
 -- ─────────────────────────────────────────────
 SELECT
-    ph.id, ph.played_at,
-    s.id    AS song_id,
+    ph.id,
+    ph.played_at,
+    s.id AS song_id,
     s.title AS bai_hat,
     s.duration,
-    a.name  AS nghe_si,
+    a.name AS nghe_si,
     al.cover_url AS anh_album
-FROM play_history ph
-JOIN songs   s  ON ph.song_id  = s.id
-JOIN artists a  ON s.artist_id = a.id
-LEFT JOIN albums al ON s.album_id = al.id
-WHERE ph.user_id = 1
+FROM
+    play_history ph
+    JOIN songs s ON ph.song_id = s.id
+    JOIN artists a ON s.artist_id = a.id
+    LEFT JOIN albums al ON s.album_id = al.id
+WHERE
+    ph.user_id = 1
 ORDER BY ph.played_at DESC
 LIMIT 20;
 
 -- ─────────────────────────────────────────────
 -- 9. LẤY DANH SÁCH NGHỆ SĨ USER ĐANG FOLLOW
 -- ─────────────────────────────────────────────
-SELECT
-    a.id, a.name, a.avatar_url,
-    a.country, a.verified,
-    fa.followed_at
-FROM followed_artists fa
-JOIN artists a ON fa.artist_id = a.id
-WHERE fa.user_id = 1
+SELECT a.id, a.name, a.avatar_url, a.country, a.verified, fa.followed_at
+FROM
+    followed_artists fa
+    JOIN artists a ON fa.artist_id = a.id
+WHERE
+    fa.user_id = 1
 ORDER BY fa.followed_at DESC;
 
 -- ─────────────────────────────────────────────
@@ -355,37 +471,36 @@ ORDER BY fa.followed_at DESC;
 -- ─────────────────────────────────────────────
 -- Tìm bài hát
 SELECT 'song' AS loai, s.id, s.title AS ten, a.name AS nghe_si, al.cover_url AS anh
-FROM songs s
-JOIN artists a ON s.artist_id = a.id
-LEFT JOIN albums al ON s.album_id = al.id
-WHERE s.title LIKE '%yoasobi%'
-
+FROM
+    songs s
+    JOIN artists a ON s.artist_id = a.id
+    LEFT JOIN albums al ON s.album_id = al.id
+WHERE
+    s.title LIKE '%yoasobi%'
 UNION ALL
 
 -- Tìm nghệ sĩ
 SELECT 'artist' AS loai, a.id, a.name AS ten, '' AS nghe_si, a.avatar_url AS anh
 FROM artists a
-WHERE a.name LIKE '%yoasobi%'
-
+WHERE
+    a.name LIKE '%yoasobi%'
 UNION ALL
 
 -- Tìm album
 SELECT 'album' AS loai, al.id, al.title AS ten, a.name AS nghe_si, al.cover_url AS anh
 FROM albums al
-JOIN artists a ON al.artist_id = a.id
-WHERE al.title LIKE '%yoasobi%';
+    JOIN artists a ON al.artist_id = a.id
+WHERE
+    al.title LIKE '%yoasobi%';
 
 -- ─────────────────────────────────────────────
 -- 11. TOP 10 BÀI HÁT NGHE NHIỀU NHẤT
 -- ─────────────────────────────────────────────
-SELECT
-    s.id, s.title, s.plays_count,
-    a.name AS nghe_si,
-    al.title AS album,
-    al.cover_url
-FROM songs s
-JOIN artists a ON s.artist_id = a.id
-LEFT JOIN albums al ON s.album_id = al.id
+SELECT s.id, s.title, s.plays_count, a.name AS nghe_si, al.title AS album, al.cover_url
+FROM
+    songs s
+    JOIN artists a ON s.artist_id = a.id
+    LEFT JOIN albums al ON s.album_id = al.id
 ORDER BY s.plays_count DESC
 LIMIT 10;
 
@@ -393,63 +508,104 @@ LIMIT 10;
 -- 12. LẤY THÔNG TIN USER + GÓI SUBSCRIPTION
 -- ─────────────────────────────────────────────
 SELECT
-    u.id, u.username, u.email,
-    u.avatar_url, u.country,
-    s.plan, s.started_at, s.expires_at,
+    u.id,
+    u.username,
+    u.email,
+    u.avatar_url,
+    u.country,
+    s.plan,
+    s.started_at,
+    s.expires_at,
     CASE
-        WHEN s.expires_at IS NULL OR s.expires_at > NOW() THEN 'active'
+        WHEN s.expires_at IS NULL
+        OR s.expires_at > NOW() THEN 'active'
         ELSE 'expired'
     END AS trang_thai
 FROM users u
-LEFT JOIN subscriptions s ON u.id = s.user_id
-WHERE u.id = 1;
+    LEFT JOIN subscriptions s ON u.id = s.user_id
+WHERE
+    u.id = 1;
 
 -- ─────────────────────────────────────────────
 -- 13. BÀI HÁT THEO THỂ LOẠI
 -- ─────────────────────────────────────────────
-SELECT
-    s.id, s.title, s.duration, s.plays_count,
-    a.name AS nghe_si,
-    al.cover_url,
-    g.name AS the_loai
-FROM songs s
-JOIN artists    a  ON s.artist_id  = a.id
-JOIN song_genres sg ON s.id        = sg.song_id
-JOIN genres     g  ON sg.genre_id  = g.id
-LEFT JOIN albums al ON s.album_id  = al.id
-WHERE g.name = 'K-Pop'
+SELECT s.id, s.title, s.duration, s.plays_count, a.name AS nghe_si, al.cover_url, g.name AS the_loai
+FROM
+    songs s
+    JOIN artists a ON s.artist_id = a.id
+    JOIN song_genres sg ON s.id = sg.song_id
+    JOIN genres g ON sg.genre_id = g.id
+    LEFT JOIN albums al ON s.album_id = al.id
+WHERE
+    g.name = 'K-Pop'
 ORDER BY s.plays_count DESC;
 
 -- ─────────────────────────────────────────────
 -- 14. ĐỀ XUẤT BÀI HÁT (cùng thể loại, chưa nghe)
 -- ─────────────────────────────────────────────
-WITH top_genres AS (
-    SELECT sg2.genre_id
-    FROM play_history ph
-    JOIN song_genres sg2 ON ph.song_id = sg2.song_id
-    WHERE ph.user_id = 1
-    GROUP BY sg2.genre_id
-    ORDER BY COUNT(*) DESC
-    LIMIT 3
-)
+WITH
+    top_genres AS (
+        SELECT sg2.genre_id
+        FROM
+            play_history ph
+            JOIN song_genres sg2 ON ph.song_id = sg2.song_id
+        WHERE
+            ph.user_id = 1
+        GROUP BY
+            sg2.genre_id
+        ORDER BY COUNT(*) DESC
+        LIMIT 3
+    )
 
-SELECT 
-    s.id,
-    s.title,
-    s.duration,
-    s.plays_count,
-    a.name AS nghe_si,
-    al.cover_url
-FROM songs s
-JOIN artists a       ON s.artist_id = a.id
-JOIN song_genres sg  ON s.id = sg.song_id
-LEFT JOIN albums al  ON s.album_id = al.id
-JOIN top_genres tg   ON sg.genre_id = tg.genre_id
-WHERE s.id NOT IN (
-    SELECT song_id 
-    FROM play_history 
-    WHERE user_id = 1
-)
-GROUP BY s.id
+SELECT s.id, s.title, s.duration, s.plays_count, a.name AS nghe_si, al.cover_url
+FROM
+    songs s
+    JOIN artists a ON s.artist_id = a.id
+    JOIN song_genres sg ON s.id = sg.song_id
+    LEFT JOIN albums al ON s.album_id = al.id
+    JOIN top_genres tg ON sg.genre_id = tg.genre_id
+WHERE
+    s.id NOT IN(
+        SELECT song_id
+        FROM play_history
+        WHERE
+            user_id = 1
+    )
+GROUP BY
+    s.id
 ORDER BY s.plays_count DESC
 LIMIT 20;
+
+-- =============================================
+--  CẬP NHẬT THÊM
+-- =============================================
+
+-- thêm role artist , admin  vào bảng users
+ALTER TABLE users
+MODIFY COLUMN role ENUM('user', 'artist', 'admin') NOT NULL DEFAULT 'user';
+
+-- Gán artist_id cho user (liên kết user → artists table)
+ALTER TABLE users ADD COLUMN artist_id INT UNSIGNED NULL AFTER role;
+
+ALTER TABLE users
+ADD FOREIGN KEY (artist_id) REFERENCES artists (id) ON DELETE SET NULL;
+
+-- gán admin role cho user có id = 1
+UPDATE users SET role = 'admin' WHERE id = 1;
+
+-- table artist_requests để lưu thông tin đăng ký làm nghệ sĩ
+CREATE TABLE artist_requests (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT UNSIGNED NOT NULL,
+    artist_name VARCHAR(255) NOT NULL,
+    bio TEXT,
+    reason TEXT,
+    status ENUM(
+        'pending',
+        'approved',
+        'rejected'
+    ) NOT NULL DEFAULT 'pending',
+    created_at DATETIME DEFAULT NOW(),
+    reviewed_at DATETIME,
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);

@@ -943,3 +943,96 @@ function updateAlbumCoverPreview(url) {
 		img.src = url;
 	}, 600);
 }
+
+// ─────────────────────────────────────────────
+// ARTIST REQUESTS
+// ─────────────────────────────────────────────
+async function loadRequests() {
+	try {
+		const res = await authFetch(`${API}/artist-requests`);
+		const list = await res.json();
+		if (!res.ok) return;
+
+		const pending = list.filter(r => r.status === 'pending').length;
+		const badge = document.getElementById('navRequestsBadge');
+		if (pending > 0) {
+			badge.textContent = pending;
+			badge.style.display = 'inline';
+		} else {
+			badge.style.display = 'none';
+		}
+
+		document.getElementById('requestsCount').textContent =
+			`${list.length} yêu cầu · ${pending} đang chờ`;
+
+		const el = document.getElementById('requestsList');
+		if (!list.length) {
+			el.innerHTML = '<div style="text-align:center;color:var(--text-dim);padding:60px;">Chưa có yêu cầu nào</div>';
+			return;
+		}
+
+		el.innerHTML = list.map(r => `
+      <div class="request-card ${r.status}" id="req-card-${r.id}">
+        <div class="request-avatar">${r.username[0].toUpperCase()}</div>
+        <div class="request-info">
+          <div class="request-artist-name">🎤 ${r.artist_name}</div>
+          <div class="request-user">${r.username} · ${r.email}</div>
+          ${r.bio ? `<div class="request-bio">📝 ${r.bio}</div>` : ''}
+          ${r.reason ? `<div class="request-reason">"${r.reason}"</div>` : ''}
+          <div class="request-date">Gửi lúc ${new Date(r.created_at).toLocaleString('vi-VN')}</div>
+        </div>
+        <div style="display:flex;flex-direction:column;align-items:flex-end;gap:10px;">
+          <span class="request-status status-${r.status}">
+            ${r.status === 'pending' ? '⏳ Chờ duyệt' : r.status === 'approved' ? '✅ Đã duyệt' : '❌ Từ chối'}
+          </span>
+          ${r.status === 'pending' ? `
+            <div class="request-actions">
+              <button class="btn-approve" onclick="reviewRequest(${r.id}, 'approve')">✅ Approve</button>
+              <button class="btn-reject"  onclick="reviewRequest(${r.id}, 'reject')">❌ Reject</button>
+            </div>` : ''}
+        </div>
+      </div>`).join('');
+	} catch (e) { console.error('loadRequests:', e); }
+}
+
+async function reviewRequest(id, action) {
+	const label = action === 'approve' ? 'duyệt' : 'từ chối';
+	if (!confirm(`Xác nhận ${label} yêu cầu này?`)) return;
+	try {
+		const res = await authFetch(`${API}/artist-requests/${id}`, {
+			method: 'PATCH',
+			headers: { 'Content-Type': 'application/json' },
+			body: JSON.stringify({ action }),
+		});
+		const data = await res.json();
+		if (!res.ok) throw new Error(data.error);
+		showToast(data.message);
+		loadRequests(); // reload list
+	} catch (err) { showToast(err.message, 'error'); }
+}
+
+// Override switchPage để load requests khi vào trang
+const __switchPage = window.switchPage;
+window.switchPage = function (name) {
+	__switchPage(name);
+	if (name === 'requests') loadRequests();
+};
+
+// Load badge khi init
+async function loadRequestsBadge() {
+	try {
+		const res = await authFetch(`${API}/artist-requests`);
+		const list = await res.json();
+		const pending = list.filter(r => r.status === 'pending').length;
+		const badge = document.getElementById('navRequestsBadge');
+		if (pending > 0) { badge.textContent = pending; badge.style.display = 'inline'; }
+	} catch { }
+}
+
+// Thêm vào initAdmin
+const _initAdmin = window.initAdmin || function () { };
+const __origInit = initAdmin;
+function initAdmin() {
+	__origInit();
+	loadRequestsBadge();
+}

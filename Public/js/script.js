@@ -22,6 +22,131 @@ document.addEventListener('DOMContentLoaded', () => {
 	document.getElementById('udName').textContent = user.username;
 	document.getElementById('udEmail').textContent = user.email;
 
+	// Sync role từ server — phòng trường hợp bị approve/thay đổi role sau khi login
+	(async () => {
+		try {
+			const res = await fetch(`${API}/auth/me`, {
+				headers: { 'Authorization': `Bearer ${token}` }
+			});
+			if (res.ok) {
+				const fresh = await res.json();
+				if (fresh.role !== user.role || fresh.artist_id !== user.artist_id) {
+					// Role đã thay đổi → cập nhật localStorage
+					const updated = { ...user, role: fresh.role, artist_id: fresh.artist_id };
+					localStorage.setItem('sw_user', JSON.stringify(updated));
+					// Reload để áp dụng UI mới
+					window.location.reload();
+				}
+			}
+		} catch { }
+	})();
+
+	/* ── Hiển thị UI theo role ── */
+	const roleBadge = document.getElementById('udRoleBadge');
+	const artistDashLink = document.getElementById('udArtistDashboard');
+	const becomeArtistBtn = document.getElementById('udBecomeArtistBtn');
+	const requestStatusEl = document.getElementById('udRequestStatus');
+
+	if (user.role === 'artist') {
+		roleBadge.style.display = 'block';
+		artistDashLink.style.display = 'block';
+	} else if (user.role === 'admin') {
+		roleBadge.textContent = '🛡️ Admin';
+		roleBadge.style.display = 'block';
+		artistDashLink.style.display = 'block';
+	} else {
+		// User thường → kiểm tra có request pending không
+		becomeArtistBtn.style.display = 'block';
+		checkArtistRequestStatus();
+	}
+
+	becomeArtistBtn.addEventListener('click', () => {
+		document.getElementById('userDropdown').classList.remove('show');
+		openBecomeArtistModal();
+	});
+
+	async function checkArtistRequestStatus() {
+		try {
+			const res = await fetch(`${API}/artist-requests/me`, {
+				headers: { 'Authorization': `Bearer ${token}` }
+			});
+			const req = await res.json();
+			if (!req) return;
+
+			if (req.status === 'pending') {
+				becomeArtistBtn.style.display = 'none';
+				requestStatusEl.style.display = 'block';
+				requestStatusEl.innerHTML = '⏳ Yêu cầu đang chờ duyệt';
+			} else if (req.status === 'rejected') {
+				requestStatusEl.style.display = 'block';
+				requestStatusEl.innerHTML = '❌ Yêu cầu bị từ chối · <span style="color:#1db954;cursor:pointer;" onclick="openBecomeArtistModal()">Gửi lại</span>';
+			}
+		} catch { }
+	}
+
+	/* ── Become Artist Modal ── */
+	window.openBecomeArtistModal = function () {
+		document.getElementById('reqArtistName').value = '';
+		document.getElementById('reqBio').value = '';
+		document.getElementById('reqReason').value = '';
+		document.getElementById('reqError').style.display = 'none';
+		document.getElementById('becomeArtistModal').style.display = 'flex';
+	};
+
+	window.closeBecomeArtistModal = function () {
+		document.getElementById('becomeArtistModal').style.display = 'none';
+	};
+
+	// Đóng khi click overlay
+	document.getElementById('becomeArtistModal').addEventListener('click', function (e) {
+		if (e.target === this) window.closeBecomeArtistModal();
+	});
+
+	window.submitArtistRequest = async function () {
+		const name = document.getElementById('reqArtistName').value.trim();
+		const bio = document.getElementById('reqBio').value.trim();
+		const reason = document.getElementById('reqReason').value.trim();
+		const errEl = document.getElementById('reqError');
+		const btn = document.getElementById('reqSubmitBtn');
+
+		if (!name) {
+			errEl.textContent = 'Vui lòng nhập tên nghệ sĩ';
+			errEl.style.display = 'block';
+			return;
+		}
+		errEl.style.display = 'none';
+		btn.disabled = true;
+		btn.textContent = 'Đang gửi...';
+
+		try {
+			const res = await fetch(`${API}/artist-requests`, {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+				body: JSON.stringify({ artist_name: name, bio, reason }),
+			});
+			const data = await res.json();
+
+			if (!res.ok) {
+				errEl.textContent = data.error;
+				errEl.style.display = 'block';
+				return;
+			}
+
+			window.closeBecomeArtistModal();
+			// Cập nhật status
+			becomeArtistBtn.style.display = 'none';
+			requestStatusEl.style.display = 'block';
+			requestStatusEl.innerHTML = '⏳ Yêu cầu đang chờ duyệt';
+
+		} catch {
+			errEl.textContent = 'Lỗi kết nối server';
+			errEl.style.display = 'block';
+		} finally {
+			btn.disabled = false;
+			btn.textContent = 'Gửi yêu cầu';
+		}
+	};
+
 	/* ══════════════════════════════════════════
 				QUEUE SYSTEM
 				Trái tim của playing system
@@ -145,6 +270,10 @@ document.addEventListener('DOMContentLoaded', () => {
 		trackName.textContent = song.title;
 		trackArtist.textContent = song.artist;
 		nowThumb.textContent = song.emoji || '🎵';
+
+		// Lưu album_id và artist_id để click navigate
+		trackName.dataset.albumId = song.album_id || '';
+		trackArtist.dataset.artistId = song.artist_id || '';
 
 		// Reset
 		progress = 0;
@@ -772,6 +901,8 @@ document.addEventListener('DOMContentLoaded', () => {
 					title: s.title,
 					artist: artist.name,
 					emoji: '🎵',
+					album_id: s.album_id || '',
+					artist_id: artist.id || '',
 				}));
 				window.playCollection(songs, 0);
 			};
@@ -786,6 +917,8 @@ document.addEventListener('DOMContentLoaded', () => {
 						title: s.title,
 						artist: artist.name,
 						emoji: '🎵',
+						album_id: s.album_id || '',
+						artist_id: artist.id || '',
 					}));
 					// Tìm index thực trong allSongs theo id
 					const realIdx = allSongs.findIndex(s => s.id === songId);
@@ -802,6 +935,8 @@ document.addEventListener('DOMContentLoaded', () => {
 						title: s.title,
 						artist: artist.name,
 						emoji: '🎵',
+						album_id: s.album_id || '',
+						artist_id: artist.id || '',
 					}));
 					window.playCollection(songs, idx);
 				});
@@ -970,6 +1105,8 @@ document.addEventListener('DOMContentLoaded', () => {
 					title: s.title,
 					artist: album.artist_name || '',
 					emoji: '🎵',
+					album_id: album.id || '',
+					artist_id: album.artist_id || '',
 				}));
 				window.playCollection(list, 0);
 			};
@@ -983,6 +1120,8 @@ document.addEventListener('DOMContentLoaded', () => {
 						title: s.title,
 						artist: album.artist_name || '',
 						emoji: '🎵',
+						album_id: album.id || '',
+						artist_id: album.artist_id || '',
 					}));
 					window.playCollection(list, idx);
 				});
@@ -1006,6 +1145,18 @@ document.addEventListener('DOMContentLoaded', () => {
 			e.preventDefault();
 			openAlbumPage(albumLink.dataset.albumId);
 		}
+	});
+
+	// ── Click tên bài hát ở player footer → mở album page ──
+	trackName.addEventListener('click', () => {
+		const albumId = trackName.dataset.albumId;
+		if (albumId) openAlbumPage(albumId);
+	});
+
+	// ── Click tên artist ở player footer → mở artist page ──
+	trackArtist.addEventListener('click', () => {
+		const artistId = trackArtist.dataset.artistId;
+		if (artistId) openArtistPage(artistId);
 	});
 
 	// Nút Back từ album page → quay về trang trước

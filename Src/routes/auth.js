@@ -118,4 +118,28 @@ router.post('/reset-password', async (req, res) => {
 	}
 });
 
+// GET /api/auth/me — lấy thông tin user hiện tại (dùng để sync role)
+router.get('/me', async (req, res) => {
+	try {
+		const authHeader = req.headers['authorization'];
+		const token = authHeader && authHeader.split(' ')[1];
+		if (!token) return res.status(401).json({ error: 'Chưa đăng nhập' });
+
+		const jwt = require('jsonwebtoken');
+		const JWT_SECRET = process.env.JWT_SECRET || 'soundwave_secret';
+		const decoded = jwt.verify(token, JWT_SECRET);
+
+		const rows = await db.query(
+			'SELECT id, username, email, role, artist_id, avatar_url FROM users WHERE id = ?',
+			[decoded.userId]
+		);
+		if (!rows.length) return res.status(404).json({ error: 'Không tìm thấy user' });
+
+		const u = rows[0];
+		res.json({ id: u.id, username: u.username, email: u.email, role: u.role, artist_id: u.artist_id, avatar: u.avatar_url });
+	} catch (err) {
+		res.status(403).json({ error: 'Token không hợp lệ' });
+	}
+});
+
 module.exports = router;
