@@ -68,7 +68,7 @@ router.post('/login', async (req, res) => {
 
 		// Tạo JWT token — bao gồm role
 		const token = jwt.sign(
-			{ userId: user.id, username: user.username, role: user.role || 'user' },
+			{ userId: user.id, username: user.username, role: user.role || 'user', artist_id: user.artist_id || null },
 			JWT_SECRET,
 			{ expiresIn: '7d' }
 		);
@@ -82,6 +82,7 @@ router.post('/login', async (req, res) => {
 				email: user.email,
 				avatar: user.avatar_url,
 				role: user.role || 'user',
+				artist_id: user.artist_id || null,
 			}
 		});
 	} catch (err) {
@@ -136,7 +137,14 @@ router.get('/me', async (req, res) => {
 		if (!rows.length) return res.status(404).json({ error: 'Không tìm thấy user' });
 
 		const u = rows[0];
-		res.json({ id: u.id, username: u.username, email: u.email, role: u.role, artist_id: u.artist_id, avatar: u.avatar_url });
+		res.json({
+			id: u.id,
+			username: u.username,
+			email: u.email,
+			role: u.role || 'user',
+			artist_id: u.artist_id || null,
+			avatar: u.avatar_url,
+		});
 	} catch (err) {
 		res.status(403).json({ error: 'Token không hợp lệ' });
 	}

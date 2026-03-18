@@ -207,3 +207,12 @@ search page
 - khi bấm vào podcast sẽ ra podcast page
 
 có artist admin page
+những gì còn thiếu 
+❌ Like system + trang “Liked Songs”
+❌ Recommendation (theo genre, play history)
+❌ Persistent player (không reset khi đổi trang)
+❌ Các trang: Lyrics page, Artist page, Album page, Podcast page
+❌ Thư viện hiện đúng: liked songs, playlists, followed artists
+❌ Gapless/Crossfade playback
+❌ Navigation history (nút mũi tên back/forward)
+❌ Smart Queue, Drag & Drop queue

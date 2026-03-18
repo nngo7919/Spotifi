@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	/* ── Hiển thị UI theo role ── */
 	const roleBadge = document.getElementById('udRoleBadge');
 	const artistDashLink = document.getElementById('udArtistDashboard');
+	const adminDashLink = document.getElementById('udAdminDashboard');
 	const becomeArtistBtn = document.getElementById('udBecomeArtistBtn');
 	const requestStatusEl = document.getElementById('udRequestStatus');
 
@@ -53,7 +54,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	} else if (user.role === 'admin') {
 		roleBadge.textContent = '🛡️ Admin';
 		roleBadge.style.display = 'block';
-		artistDashLink.style.display = 'block';
+		adminDashLink.style.display = 'block';   // hiện Admin Dashboard
+		artistDashLink.style.display = 'block';  // admin cũng vào được artist dashboard
 	} else {
 		// User thường → kiểm tra có request pending không
 		becomeArtistBtn.style.display = 'block';
@@ -1245,13 +1247,17 @@ document.addEventListener('DOMContentLoaded', () => {
 			el.classList.toggle('lrc-upcoming', i > idx);
 		});
 
-		// Auto scroll dòng active vào giữa panel
+		// Scroll #mainContent để dòng active nằm giữa màn hình
 		const activeEl = textEl.querySelector('.lrc-active');
 		if (activeEl) {
-			const parent = document.getElementById('lyricsRight') || textEl.closest('.lyrics-right');
-			if (parent) {
-				const offset = activeEl.offsetTop - parent.clientHeight / 2 + activeEl.clientHeight / 2;
-				parent.scrollTo({ top: offset, behavior: 'smooth' });
+			const scroller = document.getElementById('mainContent');
+			if (scroller) {
+				const scrollerRect = scroller.getBoundingClientRect();
+				const elRect = activeEl.getBoundingClientRect();
+				// Vị trí dòng active so với top của scroller + scrollTop hiện tại
+				const elOffsetInScroller = elRect.top - scrollerRect.top + scroller.scrollTop;
+				const target = elOffsetInScroller - scroller.clientHeight / 2 + activeEl.clientHeight / 2;
+				scroller.scrollTo({ top: target, behavior: 'smooth' });
 			}
 		}
 	}

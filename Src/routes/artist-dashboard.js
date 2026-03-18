@@ -12,13 +12,32 @@ const db = require('../db');
 const { verifyToken } = require('../middleware/auth');
 
 // ── Middleware: chỉ artist mới vào được ──
-function verifyArtist(req, res, next) {
-	verifyToken(req, res, () => {
-		if (req.user.role !== 'artist' && req.user.role !== 'admin')
-			return res.status(403).json({ error: 'Bạn không phải nghệ sĩ.' });
-		if (!req.user.artist_id)
-			return res.status(403).json({ error: 'Tài khoản chưa được liên kết với hồ sơ nghệ sĩ.' });
-		next();
+// FIX: Luôn query DB để lấy role + artist_id mới nhất,
+// tránh trường hợp token cũ chưa có artist_id dù DB đã approve
+async function verifyArtist(req, res, next) {
+	verifyToken(req, res, async () => {
+		try {
+			const rows = await db.query(
+				'SELECT role, artist_id FROM users WHERE id = ?',
+				[req.user.userId]
+			);
+			if (!rows.length)
+				return res.status(403).json({ error: 'Không tìm thấy tài khoản.' });
+
+			const { role, artist_id } = rows[0];
+
+			if (role !== 'artist' && role !== 'admin')
+				return res.status(403).json({ error: 'Bạn không phải nghệ sĩ.' });
+			if (!artist_id)
+				return res.status(403).json({ error: 'Tài khoản chưa được liên kết với hồ sơ nghệ sĩ.' });
+
+			// Gắn thông tin mới nhất vào req.user để các route dùng
+			req.user.role = role;
+			req.user.artist_id = artist_id;
+			next();
+		} catch (err) {
+			res.status(500).json({ error: err.message });
+		}
 	});
 }
 

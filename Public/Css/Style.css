@@ -1475,8 +1475,9 @@ ul { list-style: none; padding: 0; margin: 0; }
 
 /* ── Right panel ── */
 .lyrics-right {
-  padding: 48px 56px;
+  padding: 48px 56px 50vh 56px;  /* padding-bottom lớn để dòng cuối scroll lên được */
   overflow-y: auto;
+  scroll-behavior: smooth;
 }
 
 .lyrics-label {
@@ -1558,9 +1559,4 @@ ul { list-style: none; padding: 0; margin: 0; }
   line-height: 2;
   white-space: pre-wrap;
   color: rgba(255,255,255,0.8);
-}
-
-/* Scroll smooth cho lyrics-right */
-.lyrics-right {
-  scroll-behavior: smooth;
 }
