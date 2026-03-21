@@ -2,9 +2,9 @@
 --  SoundWave Database Schema (MySQL)
 -- =============================================
 
-CREATE DATABASE IF NOT EXISTS soundwave CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE DATABASE IF NOT EXISTS spotifi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-USE soundwave;
+USE spotifi;
 
 -- ─────────────────────────────────────────────
 -- 1. USERS
