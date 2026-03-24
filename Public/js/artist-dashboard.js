@@ -20,13 +20,12 @@ async function checkAuth() {
 			document.getElementById('loginGate').style.display = 'none';
 			initDashboard(data);
 		} else {
-			// Token không hợp lệ hoặc chưa có artist_id → hiện login gate
+			// Token hết hạn hoặc không hợp lệ → hiện login gate
 			artistToken = '';
 			sessionStorage.removeItem('artistToken');
-			// KHÔNG xóa localStorage — để user vẫn còn đăng nhập ở trang chính
-			const errEl = document.getElementById('loginError');
 			if (res.status === 403) {
-				errEl.textContent = 'Vui lòng đăng nhập lại để vào Artist Dashboard.';
+				const errEl = document.getElementById('loginError');
+				errEl.textContent = 'Vui lòng đăng nhập lại.';
 				errEl.style.display = 'block';
 			}
 		}

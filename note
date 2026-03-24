@@ -1,21 +1,5 @@
 project sẽ có 
 
-
-
-✅ 5. Playlist System
-
-Tạo playlist
-
-Thêm bài
-
-Xóa bài
-
-Rename playlist
-
-Play toàn playlist
-
-Ảnh playlist
-
 ✅ 6. Like System
 
 Like song
@@ -196,7 +180,7 @@ thư viện
 main page 
 - bỏ tag nghệ sĩ 
 - ở tag tất cả sẽ là main page (bao gồm : play history ,nghệ sĩ nổi bật , hiện những gì music page và podcast page có )
-- ở tag nhạc sẽ là music page ( bao gồm : recomment song , remcomment album dựa trên table like song , play-history . song or album of followed artists, top 10 song most listend , top 10 album list listend .
+- ở tag nhạc sẽ là music page ( bao gồm : recomment song , remcomment album dựa trên table like song , play-history . )
 - ở tag podcast sẽ là podcast page ( bao gồm recomment podcast  , podcast of podcast followed )
 - nút mũi tên có thể trờ về trang trước hoặc trở về trang sau .
 - bấm nút trang chủ thì trở về main page , bỏ nút tìm kiếm 
@@ -208,10 +192,9 @@ search page
 
 có artist admin page
 những gì còn thiếu 
-❌ Like system + trang “Liked Songs”
 ❌ Recommendation (theo genre, play history)
 ❌ Persistent player (không reset khi đổi trang)
-❌ Các trang: Lyrics page, Artist page, Album page, Podcast page
+❌ Các trang: Podcast page
 ❌ Thư viện hiện đúng: liked songs, playlists, followed artists
 ❌ Gapless/Crossfade playback
 ❌ Navigation history (nút mũi tên back/forward)

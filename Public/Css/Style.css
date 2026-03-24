@@ -406,8 +406,10 @@ ul { list-style: none; padding: 0; margin: 0; }
   display: flex; align-items: center; justify-content: center;
   font-size: 26px;
 }
-.track-name { font-size: 14px; font-weight: 700; }
-.track-artist { font-size: 12px; color: var(--text-dim); }
+.track-name   { font-size: 14px; font-weight: 700; transition: color 0.15s; }
+.track-name:hover { color: var(--accent); text-decoration: underline; }
+.track-artist { font-size: 12px; color: var(--text-dim); transition: color 0.15s; }
+.track-artist:hover { color: var(--text); text-decoration: underline; }
 
 /* Playing bars */
 .playing-bars {
@@ -945,6 +947,8 @@ ul { list-style: none; padding: 0; margin: 0; }
   position: relative;
 }
 .song-row:hover { background: rgba(255,255,255,0.07); }
+.song-row:hover .add-to-pl-btn { opacity: 1 !important; }
+.add-to-pl-btn:hover { color: var(--accent) !important; background: rgba(29,185,84,0.1) !important; }
 .song-row.playing { background: rgba(29,185,84,0.08); }
 .song-row.playing .song-row-title { color: var(--accent); }
 
@@ -1475,9 +1479,8 @@ ul { list-style: none; padding: 0; margin: 0; }
 
 /* ── Right panel ── */
 .lyrics-right {
-  padding: 48px 56px 50vh 56px;  /* padding-bottom lớn để dòng cuối scroll lên được */
+  padding: 48px 56px;
   overflow-y: auto;
-  scroll-behavior: smooth;
 }
 
 .lyrics-label {
@@ -1560,3 +1563,75 @@ ul { list-style: none; padding: 0; margin: 0; }
   white-space: pre-wrap;
   color: rgba(255,255,255,0.8);
 }
+
+/* Scroll smooth cho lyrics-right */
+.lyrics-right {
+  scroll-behavior: smooth;
+}
+
+/* ========================
+   PLAYLIST PAGE
+   ======================== */
+
+/* Song row với nút xóa */
+.pl-song-row {
+  display: grid;
+  grid-template-columns: 40px 1fr 1fr auto auto;
+  align-items: center;
+  padding: 8px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  gap: 12px;
+  transition: background 0.15s;
+}
+.pl-song-row:hover { background: rgba(255,255,255,0.07); }
+.pl-song-row:hover .pl-remove-btn { opacity: 1; }
+.pl-song-row.playing { background: rgba(29,185,84,0.08); }
+.pl-song-row.playing .album-song-title { color: var(--accent); }
+.pl-song-row.playing .album-song-num   { color: var(--accent); }
+
+.pl-remove-btn {
+  opacity: 0;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 18px;
+  padding: 4px 6px;
+  border-radius: 4px;
+  transition: all 0.15s;
+  line-height: 1;
+}
+.pl-remove-btn:hover { color: #e53935; background: rgba(229,57,53,0.1); }
+
+/* Ảnh playlist cover */
+.pl-cover-img {
+  width: 100%; height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+/* Add to playlist context menu */
+#addToPlMenu {
+  font-family: 'Nunito', sans-serif;
+}
+.add-to-pl-item {
+  padding: 10px 16px;
+  cursor: pointer;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  transition: background 0.1s;
+}
+.add-to-pl-item:hover { background: rgba(255,255,255,0.08); }
+.add-to-pl-item-thumb {
+  width: 28px; height: 28px;
+  border-radius: 4px;
+  background: rgba(255,255,255,0.1);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.add-to-pl-item-thumb img { width: 100%; height: 100%; object-fit: cover; }
