@@ -1,0 +1,8 @@
+// npm install dotenv để sử dụng 
+DB_HOST=localhost
+DB_USER=root
+DB_PASS=1234
+DB_NAME=spotifi
+PORT=3000
+JWT_SECRET=soundwave_secret_key_123
+HF_TOKEN=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
