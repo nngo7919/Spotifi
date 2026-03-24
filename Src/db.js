@@ -474,6 +474,57 @@ async function getSongsByGenre(genreName, limit = 50) {
   `, [genreName]);
 }
 
+
+// ─────────────────────────────────────────────
+// AI EMBEDDING
+// ─────────────────────────────────────────────
+
+// Lấy tất cả bài hát kèm embedding (để tính similarity)
+async function getAllSongsWithEmbedding() {
+  return query(`
+    SELECT
+      s.id, s.title, s.mood, s.embedding,
+      a.name AS artist_name,
+      al.cover_url AS album_cover,
+      GROUP_CONCAT(g.name SEPARATOR ', ') AS genres
+    FROM songs s
+    JOIN artists a      ON s.artist_id = a.id
+    LEFT JOIN albums al ON s.album_id  = al.id
+    LEFT JOIN song_genres sg ON s.id   = sg.song_id
+    LEFT JOIN genres g  ON sg.genre_id = g.id
+    GROUP BY s.id
+  `);
+}
+
+// Lưu embedding cho 1 bài hát
+async function saveSongEmbedding(songId, embeddingArray) {
+  return query(
+    'UPDATE songs SET embedding = ? WHERE id = ?',
+    [JSON.stringify(embeddingArray), songId]
+  );
+}
+
+// Lưu mood cho 1 bài hát
+async function saveSongMood(songId, mood) {
+  return query('UPDATE songs SET mood = ? WHERE id = ?', [mood, songId]);
+}
+
+// Lấy bài hát chưa có embedding (để batch generate)
+async function getSongsWithoutEmbedding() {
+  return query(`
+    SELECT
+      s.id, s.title, s.lyrics, s.mood,
+      a.name AS artist_name,
+      GROUP_CONCAT(g.name SEPARATOR ', ') AS genres
+    FROM songs s
+    JOIN artists a      ON s.artist_id = a.id
+    LEFT JOIN song_genres sg ON s.id   = sg.song_id
+    LEFT JOIN genres g  ON sg.genre_id = g.id
+    WHERE s.embedding IS NULL
+    GROUP BY s.id
+  `);
+}
+
 // ─────────────────────────────────────────────
 // EXPORT
 // ─────────────────────────────────────────────
@@ -523,4 +574,10 @@ module.exports = {
 
   // Raw query (dùng cho auth)
   query,
+
+  // AI Embedding
+  getAllSongsWithEmbedding,
+  saveSongEmbedding,
+  saveSongMood,
+  getSongsWithoutEmbedding,
 };

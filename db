@@ -597,3 +597,13 @@ CREATE TABLE artist_requests (
     reviewed_at DATETIME,
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
+-- =============================================
+--  Migration: Thêm cột AI cho bảng songs
+--  Chạy 1 lần trong MySQL
+-- =============================================
+-- thêm cột mood và embedding vào bảng songs để lưu thông tin tâm trạng và vector embedding của bài hát
+ALTER TABLE songs ADD COLUMN mood VARCHAR(50) DEFAULT NULL;
+
+ALTER TABLE songs ADD COLUMN embedding LONGTEXT DEFAULT NULL;
+-- tạo index cho cột mood để tăng tốc truy vấn đề xuất bài hát theo mood
+CREATE INDEX idx_songs_mood ON songs (mood);

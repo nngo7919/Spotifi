@@ -193,6 +193,37 @@ document.addEventListener('DOMContentLoaded', () => {
 		},
 	};
 
+	// ── Smart Queue: tự thêm bài tương tự khi gần hết queue ──
+	async function smartQueueRefill() {
+		const current = Queue.current;
+		if (!current) return false;
+		try {
+			const res = await fetch(`${API}/songs/${current.id}/similar?limit=5`);
+			if (!res.ok) return false;
+			const similar = await res.json();
+			if (!similar.length) return false;
+
+			// Lọc bài chưa có trong queue
+			const existingIds = new Set(Queue.list.map(s => s.id));
+			const toAdd = similar.filter(s => !existingIds.has(s.id));
+			if (!toAdd.length) return false;
+
+			// Thêm vào cuối queue
+			toAdd.forEach(s => Queue.list.push({
+				id: s.id,
+				title: s.title,
+				artist: s.artist_name,
+				cover: s.album_cover,
+				emoji: '🎵',
+			}));
+			console.log(`[SmartQueue] Thêm ${toAdd.length} bài tương tự vào queue`);
+			return true;
+		} catch (e) {
+			console.warn('[SmartQueue] Lỗi:', e.message);
+			return false;
+		}
+	}
+
 	/* ══════════════════════════════════════════
 				PLAYER ELEMENTS
 				══════════════════════════════════════════ */
@@ -342,7 +373,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	// AUTO NEXT khi hết bài
-	audioPlayer.addEventListener('ended', () => {
+	audioPlayer.addEventListener('ended', async () => {
 		if (Queue.repeat) {
 			// Repeat 1 bài → phát lại
 			audioPlayer.currentTime = 0;
@@ -353,13 +384,23 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (Queue.hasNext || Queue.shuffle) {
 			Queue.next();
 			loadAndPlay(Queue.current);
+			// Smart Queue: nếu còn ≤ 2 bài trong queue, tự thêm bài tương tự
+			const remaining = Queue.list.length - 1 - Queue.index;
+			if (remaining <= 2) smartQueueRefill();
 		} else {
-			// Hết queue → dừng
-			playing = false;
-			progress = 0;
-			updateProgressUI();
-			playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
-			bars.style.opacity = '0.3';
+			// Hết queue → thử Smart Queue refill trước khi dừng
+			const filled = await smartQueueRefill();
+			if (filled) {
+				Queue.next();
+				loadAndPlay(Queue.current);
+			} else {
+				// Thực sự hết → dừng
+				playing = false;
+				progress = 0;
+				updateProgressUI();
+				playIcon.innerHTML = '<path d="M8 5v14l11-7z"/>';
+				bars.style.opacity = '0.3';
+			}
 		}
 	});
 
@@ -697,11 +738,19 @@ document.addEventListener('DOMContentLoaded', () => {
 		searchResults.innerHTML = `<div class="search-loading"><div class="search-spinner"></div> Đang tìm...</div>`;
 		searchResults.classList.add('open');
 		try {
-			const res = await fetch(`${API}/songs/search?q=${encodeURIComponent(keyword)}`);
+			// Thử smart-search trước (AI semantic search)
+			const res = await fetch(`${API}/songs/smart-search?q=${encodeURIComponent(keyword)}`);
 			const data = await res.json();
 			renderResults(data);
 		} catch {
-			searchResults.innerHTML = `<div class="search-empty">Lỗi kết nối server.</div>`;
+			// Fallback về search thường nếu AI lỗi
+			try {
+				const res = await fetch(`${API}/songs/search?q=${encodeURIComponent(keyword)}`);
+				const data = await res.json();
+				renderResults(data);
+			} catch {
+				searchResults.innerHTML = `<div class="search-empty">Lỗi kết nối server.</div>`;
+			}
 		}
 	}
 
