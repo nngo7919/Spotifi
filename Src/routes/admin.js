@@ -14,22 +14,30 @@ const { verifyAdmin } = require('../middleware/auth');
 // ── Multer config ──
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
-		const dir = path.join(__dirname, '../../Public/audio');
-		if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-		cb(null, dir);
+		const uploadDir = path.join(__dirname, '../Public/audio');
+		// Tạo folder nếu chưa tồn tại
+		if (!fs.existsSync(uploadDir)) {
+			fs.mkdirSync(uploadDir, { recursive: true });
+		}
+		cb(null, uploadDir);
 	},
 	filename: (req, file, cb) => {
-		cb(null, 'song_' + Date.now() + path.extname(file.originalname));
+		// Lưu theo timestamp để tránh trùng tên
+		const timestamp = Date.now();
+		const ext = path.extname(file.originalname);
+		cb(null, `audio-${timestamp}${ext}`);
 	},
 });
+
 const upload = multer({
 	storage,
-	limits: { fileSize: 50 * 1024 * 1024 },
+	limits: { fileSize: 100 * 1024 * 1024 }, // 100MB max
 	fileFilter: (req, file, cb) => {
-		if (file.mimetype === 'audio/mpeg' || file.originalname.toLowerCase().endsWith('.mp3')) {
+		const allowedTypes = ['audio/mpeg', 'audio/mp3', 'audio/wav', 'audio/ogg'];
+		if (allowedTypes.includes(file.mimetype)) {
 			cb(null, true);
 		} else {
-			cb(new Error('Chỉ chấp nhận file MP3'));
+			cb(new Error(`File type ${file.mimetype} không được hỗ trợ`), false);
 		}
 	},
 });
@@ -40,14 +48,20 @@ const upload = multer({
 
 // POST /api/admin/songs — upload bài hát
 router.post('/songs', verifyAdmin, upload.single('audio'), async (req, res) => {
+	console.log('[ADMIN/songs] req.file:', req.file);
+	console.log('[ADMIN/songs] req.body:', req.body);
 	try {
-		const { title, duration, artist_id, album_id, track_number, is_explicit, lyrics } = req.body;
+		const { title, duration, artist_id, album_id, track_number, is_explicit, lyrics, cover_url } = req.body;
 		if (!title || !duration || !artist_id) return res.status(400).json({ error: 'Thiếu title, duration hoặc artist_id' });
 		if (!req.file) return res.status(400).json({ error: 'Thiếu file MP3' });
 
 		const file_url = '/audio/' + req.file.filename;
 
-		let finalAlbumId = album_id ? parseInt(album_id) : null;
+		// Parse album_id safely - avoid NaN from empty string
+		let finalAlbumId = null;
+		if (album_id && album_id !== '' && !isNaN(parseInt(album_id))) {
+			finalAlbumId = parseInt(album_id);
+		}
 		if (!finalAlbumId) {
 			const today = new Date().toISOString().slice(0, 10);
 			const single = await db.query(
@@ -221,3 +235,101 @@ router.get('/analytics', verifyAdmin, async (req, res) => {
 });
 
 module.exports = router;
+
+// ─────────────────────────────────────────────
+// GET /api/admin/users — danh sách users
+// ─────────────────────────────────────────────
+router.get('/users', verifyAdmin, async (req, res) => {
+	try {
+		const users = await db.query(
+			'SELECT id, username, email, role, artist_id FROM users ORDER BY id DESC'
+		);
+		res.json(users);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// ─────────────────────────────────────────────
+// PATCH /api/admin/users/:id/role — gán role artist + artist_id
+// ─────────────────────────────────────────────
+router.patch('/users/:id/role', verifyAdmin, async (req, res) => {
+	try {
+		const { role, artist_id } = req.body;
+		await db.query(
+			'UPDATE users SET role = ?, artist_id = ? WHERE id = ?',
+			[role || 'user', artist_id || null, req.params.id]
+		);
+		res.json({ success: true });
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// ─────────────────────────────────────────────
+// GET /api/admin/artist-requests — danh sách requests
+// ─────────────────────────────────────────────
+router.get('/artist-requests', verifyAdmin, async (req, res) => {
+	try {
+		const requests = await db.query(`
+      SELECT ar.id, ar.name, ar.bio, ar.avatar_url, ar.country,
+             ar.status, ar.note, ar.created_at,
+             u.id AS user_id, u.username, u.email
+      FROM artist_requests ar
+      JOIN users u ON ar.user_id = u.id
+      ORDER BY ar.created_at DESC
+    `);
+		res.json(requests);
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});
+
+// ─────────────────────────────────────────────
+// PATCH /api/admin/artist-requests/:id — approve / reject
+// ─────────────────────────────────────────────
+router.patch('/artist-requests/:id', verifyAdmin, async (req, res) => {
+	try {
+		const { action, note } = req.body; // action: 'approve' | 'reject'
+		const reqId = req.params.id;
+
+		const rows = await db.query('SELECT * FROM artist_requests WHERE id = ?', [reqId]);
+		if (!rows.length) return res.status(404).json({ error: 'Không tìm thấy request' });
+		const request = rows[0];
+
+		if (action === 'approve') {
+			// Tạo artist record
+			const artistResult = await db.query(
+				'INSERT INTO artists (name, bio, avatar_url, country, verified) VALUES (?, ?, ?, ?, 0)',
+				[request.name, request.bio, request.avatar_url, request.country]
+			);
+			const artistId = artistResult.insertId;
+
+			// Cập nhật user: role = artist, artist_id
+			await db.query(
+				"UPDATE users SET role = 'artist', artist_id = ? WHERE id = ?",
+				[artistId, request.user_id]
+			);
+
+			// Cập nhật request status
+			await db.query(
+				"UPDATE artist_requests SET status = 'approved', note = ? WHERE id = ?",
+				[note || null, reqId]
+			);
+
+			res.json({ success: true, artist_id: artistId, message: 'Đã duyệt và tạo tài khoản nghệ sĩ' });
+
+		} else if (action === 'reject') {
+			await db.query(
+				"UPDATE artist_requests SET status = 'rejected', note = ? WHERE id = ?",
+				[note || null, reqId]
+			);
+			res.json({ success: true, message: 'Đã từ chối yêu cầu' });
+
+		} else {
+			res.status(400).json({ error: 'action phải là approve hoặc reject' });
+		}
+	} catch (err) {
+		res.status(500).json({ error: err.message });
+	}
+});

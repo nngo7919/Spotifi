@@ -170,10 +170,7 @@ Khi queue còn ít bài, hệ thống truy vấn các bài tương tự (cùng g
 10 >   
 
 những điều cần sửa :
-Main page
-thanh PROGRESS
-- bấm vào tên bài hát thì sẽ hiện ra trang album 
-- bấm vào tên artist thì sẽ hiện tang artist
+
 thư viện
 - thư viện hiện like song , play list và followed arists
 - khi bấm vào album thì ra album page , khi bấm vào arists thì ra arists page , bấm vào playlist thì sẽ ra playlist page

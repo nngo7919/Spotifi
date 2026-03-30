@@ -44,6 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	/* ── Hiển thị UI theo role ── */
 	const roleBadge = document.getElementById('udRoleBadge');
 	const artistDashLink = document.getElementById('udArtistDashboard');
+	const adminDashLink = document.getElementById('udAdminDashboard');
 	const becomeArtistBtn = document.getElementById('udBecomeArtistBtn');
 	const requestStatusEl = document.getElementById('udRequestStatus');
 
@@ -53,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
 	} else if (user.role === 'admin') {
 		roleBadge.textContent = '🛡️ Admin';
 		roleBadge.style.display = 'block';
-		artistDashLink.style.display = 'block';
+		adminDashLink.style.display = 'block';  // admin → chỉ hiện Admin Dashboard
 	} else {
 		// User thường → kiểm tra có request pending không
 		becomeArtistBtn.style.display = 'block';
@@ -588,6 +589,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				title: el.dataset.track || el.dataset.title || 'Unknown',
 				artist: el.dataset.artist || 'SoundWave',
 				emoji: el.dataset.emoji || '🎵',
+				album_id: el.dataset.albumId || '',
+				artist_id: el.dataset.artistId || '',
 			};
 
 			// Nếu card có data-collection-id → phát cả album/playlist
@@ -618,6 +621,8 @@ document.addEventListener('DOMContentLoaded', () => {
 				title: s.title,
 				artist: s.artist_name || data.artist_name || 'Unknown',
 				emoji: '🎵',
+				album_id: s.album_id || data.id || '',
+				artist_id: s.artist_id || data.artist_id || '',
 			}));
 
 			if (!songs.length) return;
@@ -702,7 +707,9 @@ document.addEventListener('DOMContentLoaded', () => {
             data-song-id="${item.id || ''}"
             data-track="${item.name}"
             data-artist="${item.artist || ''}"
-            data-emoji="${typeEmoji[type]}">
+            data-emoji="${typeEmoji[type]}"
+            data-album-id="${item.album_id || ''}"
+            data-artist-id="${item.artist_id || ''}">
             <div class="search-item-thumb ${type === 'artist' ? 'artist' : ''}">
               ${item.image
 						? `<img src="${item.image}" style="width:100%;height:100%;object-fit:cover;border-radius:inherit;" onerror="this.parentElement.textContent='${typeEmoji[type]}'">`
@@ -840,7 +847,9 @@ document.addEventListener('DOMContentLoaded', () => {
 		return `
       <div class="song-row ${isPlaying ? 'playing' : ''}"
         data-song-id="${song.id}"
-        data-idx="${index}">
+        data-idx="${index}"
+        data-album-id="${song.album_id || ''}"
+        data-artist-id="${song.artist_id || ''}">
         <div class="song-row-num">${isPlaying
 				? '<svg viewBox="0 0 24 24" fill="#1db954" width="14" height="14"><path d="M8 5v14l11-7z"/></svg>'
 				: index + 1}</div>
@@ -1145,6 +1154,10 @@ document.addEventListener('DOMContentLoaded', () => {
 					</div>
 					<div class="album-song-plays">${formatPlays(s.plays_count)}</div>
 					<div class="album-song-dur">${secondsToMMSS(s.duration)}</div>
+					<button class="add-to-pl-btn" title="Thêm vào playlist"
+						style="opacity:0;background:none;border:none;color:var(--text-dim);
+						cursor:pointer;font-size:18px;padding:4px 8px;border-radius:4px;transition:all 0.15s;"
+						onclick="event.stopPropagation(); showAddToPlMenu(event, ${s.id}, '${s.title.replace(/'/g, "\\'")}')">＋</button>
 				</div>`;
 			}).join('');
 
@@ -1597,7 +1610,9 @@ document.addEventListener('DOMContentLoaded', () => {
             data-song-id="${s.id}"
             data-track="${s.title}"
             data-artist="${s.artist_name || ''}"
-            data-emoji="🎵">
+            data-emoji="🎵"
+            data-album-id="${s.album_id || ''}"
+            data-artist-id="${s.artist_id || ''}">
             <!-- Rank -->
             <div class="top10-rank" style="color:${rankColor}">
               ${isTop3
@@ -1643,6 +1658,8 @@ document.addEventListener('DOMContentLoaded', () => {
 						title: s.title,
 						artist: s.artist_name || '',
 						emoji: '🎵',
+						album_id: s.album_id || '',
+						artist_id: s.artist_id || '',
 					}));
 					window.playCollection(allSongs, i);
 				});
