@@ -1848,22 +1848,20 @@ document.addEventListener('DOMContentLoaded', () => {
 					const isPlaying = Queue.current && Queue.current.id == s.id;
 					const added = s.added_at ? new Date(s.added_at).toLocaleDateString('vi-VN') : '';
 					return `
-						<div class="pl-song-row ${isPlaying ? 'playing' : ''}" data-idx="${i}" data-song-id="${s.id}">
+						<div class="album-song-row ${isPlaying ? 'playing' : ''}" data-idx="${i}" data-song-id="${s.id}" data-album-id="${s.album_id || ''}" data-artist-id="${s.artist_id || ''}">
 							<div class="album-song-num">
 								${isPlaying
 							? '<svg viewBox="0 0 24 24" fill="#1db954" width="14" height="14"><path d="M8 5v14l11-7z"/></svg>'
 							: i + 1}
 							</div>
-							<div class="album-song-thumb" style="width:40px;height:40px;border-radius:4px;overflow:hidden;background:#282828;display:flex;align-items:center;justify-content:center;font-size:18px;">
-								${s.album_cover ? `<img src="${s.album_cover}" style="width:100%;height:100%;object-fit:cover;">` : '🎵'}
-							</div>
 							<div>
 								<div class="album-song-title">${s.title}</div>
 								<div class="album-song-artist">${s.artist_name || ''}</div>
 							</div>
-							<div class="album-song-plays" style="font-size:12px;color:var(--text-dim);">${added}</div>
+							<div class="album-song-plays">${added}</div>
 							<div class="album-song-dur">${secondsToMMSS(s.duration)}</div>
-							<button class="pl-remove-btn" title="Xóa khỏi playlist"
+							<button class="pl-remove-btn add-to-pl-btn" title="Xóa khỏi playlist"
+								style="opacity:0;background:none;border:none;color:#e53935;cursor:pointer;font-size:16px;padding:4px 8px;border-radius:4px;transition:all 0.15s;"
 								onclick="event.stopPropagation(); removeFromPlaylist(${playlistId}, ${s.id})">✕</button>
 						</div>`;
 				}).join('')
@@ -1883,7 +1881,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			};
 
 			// Click từng bài
-			document.querySelectorAll('#plSongList .pl-song-row').forEach(row => {
+			document.querySelectorAll('#plSongList .album-song-row').forEach(row => {
 				row.addEventListener('click', () => {
 					const idx = parseInt(row.dataset.idx);
 					const list = songs.map(s => ({
@@ -2050,29 +2048,52 @@ document.addEventListener('DOMContentLoaded', () => {
 		addToPlSongId = songId;
 		e.stopPropagation();
 
-		// Build menu
+		// Build menu dùng addEventListener thay vì onclick inline
+		// (onclick inline không gọi được local function trong closure)
 		const list = document.getElementById('addToPlList');
+		list.innerHTML = '';
+
 		if (!currentPlaylists.length) {
-			list.innerHTML = `
-				<div class="add-to-pl-item" onclick="openPlModal(); hideAddToPlMenu();">
-					<span>＋</span> Tạo playlist mới
-				</div>`;
+			const item = document.createElement('div');
+			item.className = 'add-to-pl-item';
+			item.innerHTML = '<span>＋</span> Tạo playlist mới';
+			item.addEventListener('click', e => {
+				e.stopPropagation();
+				hideAddToPlMenu();
+				openPlModal();
+			});
+			list.appendChild(item);
 		} else {
-			list.innerHTML = currentPlaylists.map(pl => `
-				<div class="add-to-pl-item" onclick="addSongToPlaylist(${pl.id}, ${songId}); hideAddToPlMenu();">
+			currentPlaylists.forEach(pl => {
+				const item = document.createElement('div');
+				item.className = 'add-to-pl-item';
+				item.innerHTML = `
 					<div class="add-to-pl-item-thumb">
 						${pl.cover_url ? `<img src="${pl.cover_url}">` : '🎵'}
 					</div>
-					${pl.name}
-				</div>`).join('') + `
-				<div class="add-to-pl-item" style="border-top:1px solid #3a3a3a;margin-top:4px;"
-					onclick="openPlModal(); hideAddToPlMenu();">
-					<span>＋</span> Tạo playlist mới
-				</div>`;
+					${pl.name}`;
+				item.addEventListener('click', e => {
+					e.stopPropagation();
+					hideAddToPlMenu();
+					addSongToPlaylist(pl.id, songId);
+				});
+				list.appendChild(item);
+			});
+
+			// Nút tạo playlist mới
+			const divider = document.createElement('div');
+			divider.className = 'add-to-pl-item';
+			divider.style.cssText = 'border-top:1px solid #3a3a3a;margin-top:4px;';
+			divider.innerHTML = '<span>＋</span> Tạo playlist mới';
+			divider.addEventListener('click', e => {
+				e.stopPropagation();
+				hideAddToPlMenu();
+				openPlModal();
+			});
+			list.appendChild(divider);
 		}
 
 		// Position
-		const rect = document.getElementById('mainContent').getBoundingClientRect();
 		addToPlMenu.style.display = 'block';
 		let top = e.clientY;
 		let left = e.clientX;
